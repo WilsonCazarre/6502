@@ -52,6 +52,11 @@
   xleftmargin=0pt,
 }
 
+\usepackage{xcolor}
+\definecolor{light-gray}{gray}{0.95}
+\newcommand{\code}[1]{\colorbox{light-gray}{\texttt{#1}}}
+\newcommand{\codenobg}[1]{\texttt{#1}}
+
 % Pacotes de citações
 \usepackage[brazilian,hyperpageref]{backref}	 % Paginas com as citações na bibl
 \usepackage[alf]{abntex2cite}	                 % Citações padrão ABNT
@@ -445,9 +450,34 @@ bloco do design deve desempenhar uma (e apenas uma) de duas possíveis funções
 
 \chapter{Desenvolvimento}
 
+O desenvolvimento da CPU se deu em algumas etapas. Primeiramente o conjunto de
+instrução foi definido como um subconjunto da família MCS650X original. Depois
+disso foram escolhidos alguns modos de endereçamento e um \emph{datapath} foi
+definido.
+
+\section{Conjunto de instruções}
+O conjunto de instruções apresentado é apenas um subconjunto da família MCS650X
+original. Os mesmos \emph{opcodes} da arquitetura original serão mantidos aqui.
+
+\begin{table}[htb]
+	\centering
+	\ABNTEXfontereduzida
+	\caption{Instruções de transferência} \label{tab:is:transfer}
+	\begin{tabular}{|l|c|c|c|}
+		\hline
+		\textbf{\emph{Opcode}} & \textbf{Mod. End} & \textbf{Assembly} & \textbf{Operação}                     \\ \hline
+		2F                     & imm               & LDA imm           & \codenobg{RegAC <= imm}               \\ \hline
+		2F                     & abs               & LDA addr          & \codenobg{RegAC <= Mem[addr]}         \\ \hline
+		2F                     & zpg               & LDA addrLow       & \codenobg{RegAC <= Mem[00 + addrLow]} \\ \hline
+		2F                     & (abs, x)          & LDA addr, x       & \codenobg{RegAC <= Mem[addr + x]}     \\ \hline
+		2F                     & (abs, y)          & LDA addr, x       & \codenobg{RegAC <= Mem[addr + x]}     \\ \hline
+	\end{tabular}
+	\legend{Fonte: Autoria Própria}
+\end{table}
+
 \begin{figure}[H]
 	\centering
-	\caption{Endereçamento indireto} \label{fig:6502}
+	\caption{Datapath} \label{fig:6502}
 	\includegraphics[scale=0.25]{../assets/img/6502.png}
 	\legend{Fonte: Autoria própria}
 \end{figure}
@@ -467,7 +497,10 @@ bloco do design deve desempenhar uma (e apenas uma) de duas possíveis funções
 \subsection{Unidade de Controle}
 A unidade de controle é responsável por enviar os sinais de controle para
 o processador com o objetivo de executar o comando armazenado no Registrador
-de Instruções.
+de Instruções. Ela é composta de 3 blocos principais sendo eles:
+\begin{enumerate}
+	\item
+\end{enumerate}
 
 
 \chapter{Resultados Obtidos e Discussões}
