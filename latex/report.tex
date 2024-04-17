@@ -183,9 +183,9 @@
 	e o Apple I. O desenvolvimento do mesmo será realizado em VHDL e implementado
 	em um FPGA. O trabalho também apresenta os detalhes da arquitetura
 	implementada, bem como seu \emph{datapath}, modos de endereçamento e ciclos de
-	execução.
-	\noindent
+	execução. \newline\newline
 	\textbf{Palavras-chaves}: 6502. NES. FPGA. Verilog.
+	\noindent
 \end{resumo}
 
 %------LISTAS SÃO OPCIONAIS---------
@@ -261,9 +261,9 @@ MCS650X. A implementação deverá ser feita em VHDL e sintetizada pelo
 \subsection{Arquitetura de von Neumann}
 
 A Arquitetura de von Neumann foi proposta por um grupo de engenheiros liderados
-por \textbf{Jonh von Neumann} em 1945 \cite{vonNeumann}. O design descrito pelo documento tem como
-objetivo de ser um caso generalizado para um computador digital e é composto
-dos seguintes componentes (\autoref{fig:vonNeumann}):
+por \textbf{Jonh von Neumann} em 1945 \cite{vonNeumann}. O design descrito pelo
+documento tem como objetivo de ser um caso generalizado para um computador
+digital e é composto dos seguintes componentes (\autoref{fig:vonNeumann}):
 \begin{enumerate}
 	\item Uma unidade capaz de executar operações aritméticas ;
 	\item Uma unidade lógica de controle;
@@ -431,7 +431,6 @@ e 127.
 \subsubsection{Endereçamento indireto}
 Nesse tipo de endereçamento, o processador busca o endereço efetivo no endereço
 que foi passado pelo operando (\autoref{fig:address:ind}).
-\autoref{fig:address:ind}
 \begin{figure}[h]
 	\centering
 	\caption{Endereçamento indireto} \label{fig:address:ind}
@@ -457,8 +456,8 @@ construção de circuitos digitais:
 	\item \textbf{\emph{Logic Level}}: Utilizar-se de Portas Lógicas como bloco
 	      principal de construção para desenvolver circuitos combinacionais.
 	\item \textbf{\emph{Register-transfer Level}}: Conectar uma rede de
-	      registradores e construir blocos que definem a lógica de transferência de
-	      estado entre esses registradores.
+	      registradores e construir blocos que definem a lógica de transferência
+	      de estado entre esses registradores.
 \end{enumerate}
 
 De maneira geral, no \emph{Register-Transfer Level Design} (ou Design RTL) cada
@@ -477,7 +476,8 @@ bloco do design deve desempenhar uma (e apenas uma) de duas possíveis funções
 	\centering
 	\ABNTEXfontereduzida
 	\caption{Tamanho da instrução por modo de endereçamento} \label{tab:Instr3OP}
-	\begin{tabular}{l|c}
+	\begin{tabular}{|l|c|}
+		\hline
 		\textbf{Modo de endereçamento}            & \textbf{Tamanho em bytes} \\ \hline
 		Acumulador (A)                            & 1                         \\ \hline
 		Absoluto (abs)                            & 3                         \\ \hline
@@ -522,65 +522,62 @@ original serão mantidos aqui \cite{6502isa}.
 		\hline
 		\multicolumn{5}{|c|}{\textbf{Instruções de transferência}}                                                                             \\ \hline
 		\textbf{Instrução}   & \textbf{Opcode} & \textbf{Mod. End} & \textbf{Assembly}      & \textbf{Operação}                                \\ \hline
-		\multirow{3}{*}{LDA} & 2f              & imm               & \codenobg{LDA imm}     & \codenobg{RegAC <= imm}                          \\ \cline{2-5}
-		                     & 2f              & abs               & \codenobg{LDA addr}    & \codenobg{RegAC <= Mem[addr]}                    \\ \cline{2-5}
-		                     & 2f              & (abs, x)          & \codenobg{LDA addr, x} & \codenobg{RegAC <= Mem[addr + x]}                \\ \hline
-		\multirow{3}{*}{LDX} & 2f              & imm               & \codenobg{LDX imm}     & \codenobg{RegX <= imm}                           \\ \cline{2-5}
-		                     & 2f              & abs               & \codenobg{LDX addr}    & \codenobg{RegX <= Mem[addr]}                     \\ \cline{2-5}
-		                     & 2f              & (abs, x)          & \codenobg{LDX addr, x} & \codenobg{RegX <= Mem[addr + x]}                 \\ \hline
-		\multirow{3}{*}{LDY} & 2f              & imm               & \codenobg{LDY imm}     & \codenobg{RegY <= imm}                           \\ \cline{2-5}
-		                     & 2f              & abs               & \codenobg{LDY addr}    & \codenobg{RegY <= Mem[addr]}                     \\ \cline{2-5}
-		                     & 2f              & (abs, x)          & \codenobg{LDY addr, x} & \codenobg{RegY <= Mem[addr + x]}                 \\ \hline
-		\multirow{2}{*}{STA} & 2f              & abs               & \codenobg{STA addr}    & \codenobg{Mem[addr]<= RegAC}                     \\ \cline{2-5}
-		                     & 2f              & (abs, x)          & \codenobg{STA addr, x} & \codenobg{Mem[addr + x]<= RegAC}                 \\ \hline
-		\multirow{2}{*}{STX} & 2f              & abs               & \codenobg{STX addr}    & \codenobg{Mem[addr]<= RegX}                      \\ \cline{2-5}
-		                     & 2f              & (abs, x)          & \codenobg{STX addr, x} & \codenobg{Mem[addr + x]<= RegX}                  \\ \hline
-		\multirow{2}{*}{STY} & 2f              & abs               & \codenobg{STY addr}    & \codenobg{Mem[addr]<= RegY}                      \\ \cline{2-5}
-		                     & 2f              & (abs, x)          & \codenobg{STY addr, x} & \codenobg{Mem[addr + x]<= RegY}                  \\ \hline
+		\multirow{3}{*}{LDA} & a9              & imm               & \codenobg{LDA imm}     & \codenobg{RegAC <= imm}                          \\ \cline{2-5}
+		                     & ad              & abs               & \codenobg{LDA addr}    & \codenobg{RegAC <= Mem[addr]}                    \\ \cline{2-5}
+		                     & bd              & (abs, x)          & \codenobg{LDA addr, x} & \codenobg{RegAC <= Mem[addr + x]}                \\ \hline
+		\multirow{3}{*}{LDX} & a2              & imm               & \codenobg{LDX imm}     & \codenobg{RegX <= imm}                           \\ \cline{2-5}
+		                     & ae              & abs               & \codenobg{LDX addr}    & \codenobg{RegX <= Mem[addr]}                     \\ \cline{2-5}
+		                     & be              & (abs, y)          & \codenobg{LDY addr, y} & \codenobg{RegY <= Mem[addr + x]}                 \\ \hline
+		\multirow{3}{*}{LDY} & a0              & imm               & \codenobg{LDY imm}     & \codenobg{RegY <= imm}                           \\ \cline{2-5}
+		                     & ac              & abs               & \codenobg{LDY addr}    & \codenobg{RegY <= Mem[addr]}                     \\ \cline{2-5}
+		                     & bc              & (abs, x)          & \codenobg{LDY addr, x} & \codenobg{RegY <= Mem[addr + x]}                 \\ \hline
+		\multirow{2}{*}{STA} & 8d              & abs               & \codenobg{STA addr}    & \codenobg{Mem[addr]<= RegAC}                     \\ \cline{2-5}
+		                     & 9d              & (abs, x)          & \codenobg{STA addr, x} & \codenobg{Mem[addr + x]<= RegAC}                 \\ \hline
+		\multirow{1}{*}{STX} & 8e              & abs               & \codenobg{STX addr}    & \codenobg{Mem[addr]<= RegX}                      \\ \hline
+		\multirow{1}{*}{STY} & 8c              & abs               & \codenobg{STY addr}    & \codenobg{Mem[addr]<= RegY}                      \\ \hline
 		\multicolumn{5}{|c|}{\textbf{Instruções lógicas e aritméticas}}                                                                        \\ \hline
 		\textbf{Instrução}   & \textbf{Opcode} & \textbf{Mod. End} & \textbf{Assembly}      & \textbf{Operação}                                \\ \hline
-		\multirow{3}{*}{ADC} & 2f              & imm               & \codenobg{ADC imm}     & \codenobg{RegAC <= RegAC + imm + C}              \\ \cline{2-5}
-		                     & 2f              & abs               & \codenobg{ADC addr}    & \codenobg{RegAC <= RegAC + Mem[addr] + C}        \\ \cline{2-5}
-		                     & 2f              & (abs, x)          & \codenobg{ADC addr, x} & \codenobg{RegAC <= RegAC + Mem[addr + x] + C}    \\ \hline
-		\multirow{3}{*}{SBC} & 2f              & imm               & \codenobg{SBC imm}     & \codenobg{RegAC <= RegAC - imm - C}              \\ \cline{2-5}
-		                     & 2f              & abs               & \codenobg{SBC addr}    & \codenobg{RegAC <= RegAC - Mem[addr] - C}        \\ \cline{2-5}
-		                     & 2f              & (abs, x)          & \codenobg{SBC addr, x} & \codenobg{RegAC <= RegAC - Mem[addr + x] - C}    \\ \hline
-		\multirow{3}{*}{AND} & 2f              & imm               & \codenobg{AND imm}     & \codenobg{RegAC <= RegAC AND imm}                \\ \cline{2-5}
-		                     & 2f              & abs               & \codenobg{AND addr}    & \codenobg{RegAC <= RegAC AND Mem[addr]}          \\ \cline{2-5}
-		                     & 2f              & (abs, x)          & \codenobg{AND addr, x} & \codenobg{RegAC <= RegAC AND Mem[addr + x]}      \\ \hline
-		\multirow{3}{*}{EOR} & 2f              & imm               & \codenobg{EOR imm}     & \codenobg{RegAC <= RegAC XOR imm}                \\ \cline{2-5}
-		                     & 2f              & abs               & \codenobg{EOR addr}    & \codenobg{RegAC <= RegAC XOR Mem[addr]}          \\ \cline{2-5}
-		                     & 2f              & (abs, x)          & \codenobg{EOR addr, x} & \codenobg{RegAC <= RegAC XOR Mem[addr + x]}      \\ \hline
-		\multirow{1}{*}{ORA} & 2f              & imm               & \codenobg{ORA imm}     & \codenobg{RegAC <= RegAC OR imm}                 \\ \hline
-		\multirow{2}{*}{ORA} & 2f              & abs               & \codenobg{ORA addr}    & \codenobg{RegAC <= RegAC OR Mem[addr]}           \\ \cline{2-5}
-		                     & 2f              & (abs, x)          & \codenobg{ORA addr, x} & \codenobg{RegAC <= RegAC OR Mem[addr + x]}       \\ \hline
+		\multirow{3}{*}{ADC} & 69              & imm               & \codenobg{ADC imm}     & \codenobg{RegAC <= RegAC + imm + C}              \\ \cline{2-5}
+		                     & 6d              & abs               & \codenobg{ADC addr}    & \codenobg{RegAC <= RegAC + Mem[addr] + C}        \\ \cline{2-5}
+		                     & 7d              & (abs, x)          & \codenobg{ADC addr, x} & \codenobg{RegAC <= RegAC + Mem[addr + x] + C}    \\ \hline
+		\multirow{3}{*}{SBC} & e9              & imm               & \codenobg{SBC imm}     & \codenobg{RegAC <= RegAC - imm - C}              \\ \cline{2-5}
+		                     & ed              & abs               & \codenobg{SBC addr}    & \codenobg{RegAC <= RegAC - Mem[addr] - C}        \\ \cline{2-5}
+		                     & fd              & (abs, x)          & \codenobg{SBC addr, x} & \codenobg{RegAC <= RegAC - Mem[addr + x] - C}    \\ \hline
+		\multirow{3}{*}{AND} & 29              & imm               & \codenobg{AND imm}     & \codenobg{RegAC <= RegAC AND imm}                \\ \cline{2-5}
+		                     & 2d              & abs               & \codenobg{AND addr}    & \codenobg{RegAC <= RegAC AND Mem[addr]}          \\ \cline{2-5}
+		                     & 3d              & (abs, x)          & \codenobg{AND addr, x} & \codenobg{RegAC <= RegAC AND Mem[addr + x]}      \\ \hline
+		\multirow{3}{*}{EOR} & 49              & imm               & \codenobg{EOR imm}     & \codenobg{RegAC <= RegAC XOR imm}                \\ \cline{2-5}
+		                     & 4d              & abs               & \codenobg{EOR addr}    & \codenobg{RegAC <= RegAC XOR Mem[addr]}          \\ \cline{2-5}
+		                     & 5d              & (abs, x)          & \codenobg{EOR addr, x} & \codenobg{RegAC <= RegAC XOR Mem[addr + x]}      \\ \hline
+		\multirow{2}{*}{ORA} & 09              & imm               & \codenobg{ORA imm}     & \codenobg{RegAC <= RegAC OR imm}                 \\ \cline{2-5}
+		                     & 0d              & abs               & \codenobg{ORA addr}    & \codenobg{RegAC <= RegAC OR Mem[addr]}           \\ \hline
+		\multirow{1}{*}{ORA} & 1d              & (abs, x)          & \codenobg{ORA addr, x} & \codenobg{RegAC <= RegAC OR Mem[addr + x]}       \\ \hline
 		\multicolumn{5}{|c|}{\textbf{Comparação}}                                                                                              \\ \hline
 		\textbf{Instrução}   & \textbf{Opcode} & \textbf{Mod. End} & \textbf{Assembly}      & \textbf{Operação}                                \\ \hline
-		\multirow{3}{*}{CMP} & 2f              & imm               & \codenobg{CMP imm}     & \codenobg{C, N, V, Z <= ACC - imm }              \\ \cline{2-5}
-		                     & 2f              & abs               & \codenobg{CMP addr}    & \codenobg{C, N, V, Z <= ACC - Mem[addr] }        \\ \cline{2-5}
-		                     & 2f              & (abs, x)          & \codenobg{CMP addr, x} & \codenobg{C, N, V, Z <= ACC - Mem[addr - x] }    \\ \hline
+		\multirow{3}{*}{CMP} & c9              & imm               & \codenobg{CMP imm}     & \codenobg{C, N, V, Z <= ACC - imm }              \\ \cline{2-5}
+		                     & cd              & abs               & \codenobg{CMP addr}    & \codenobg{C, N, V, Z <= ACC - Mem[addr] }        \\ \cline{2-5}
+		                     & dd              & (abs, x)          & \codenobg{CMP addr, x} & \codenobg{C, N, V, Z <= ACC - Mem[addr - x] }    \\ \hline
 		\multicolumn{5}{|c|}{\textbf{Flags}}                                                                                                   \\ \hline
 		\textbf{Instrução}   & \textbf{Opcode} & \textbf{Mod. End} & \textbf{Assembly}      & \textbf{Operação}                                \\ \hline
-		\multirow{1}{*}{SEC} & 2f              & impl              & \codenobg{SEC}         & \codenobg{C <= 1}                                \\ \hline
-		\multirow{1}{*}{CLC} & 2f              & impl              & \codenobg{CLC}         & \codenobg{C <= 0}                                \\ \hline
+		\multirow{1}{*}{SEC} & 38              & impl              & \codenobg{SEC}         & \codenobg{C <= 1}                                \\ \hline
+		\multirow{1}{*}{CLC} & 18              & impl              & \codenobg{CLC}         & \codenobg{C <= 0}                                \\ \hline
 		\multicolumn{5}{|c|}{\textbf{Instruções de \emph{branch}}}                                                                             \\ \hline
 		\textbf{Instrução}   & \textbf{Opcode} & \textbf{Mod. End} & \textbf{Assembly}      & \textbf{Operação}                                \\ \hline
-		\multirow{1}{*}{BCC} & 2f              & rel               & \codenobg{BCC}         & \codenobg{branch on C = 0}                       \\ \hline
-		\multirow{1}{*}{BCS} & 2f              & rel               & \codenobg{BCS}         & \codenobg{branch on C = 1}                       \\ \hline
-		\multirow{1}{*}{BEQ} & 2f              & rel               & \codenobg{BEQ}         & \codenobg{branch on Z = 1}                       \\ \hline
-		\multirow{1}{*}{BMI} & 2f              & rel               & \codenobg{BMI}         & \codenobg{branch on N = 1}                       \\ \hline
-		\multirow{1}{*}{BNE} & 2f              & rel               & \codenobg{BNE}         & \codenobg{branch on Z = 0}                       \\ \hline
-		\multirow{1}{*}{BPL} & 2f              & rel               & \codenobg{BPL}         & \codenobg{branch on N = 0}                       \\ \hline
-		\multirow{1}{*}{BVC} & 2f              & rel               & \codenobg{BVC}         & \codenobg{branch on V = 0}                       \\ \hline
-		\multirow{1}{*}{BVS} & 2f              & rel               & \codenobg{BVS}         & \codenobg{branch on V = 1}                       \\ \hline
+		\multirow{1}{*}{BCC} & 90              & rel               & \codenobg{BCC}         & \codenobg{branch on C = 0}                       \\ \hline
+		\multirow{1}{*}{BCS} & b0              & rel               & \codenobg{BCS}         & \codenobg{branch on C = 1}                       \\ \hline
+		\multirow{1}{*}{BEQ} & f0              & rel               & \codenobg{BEQ}         & \codenobg{branch on Z = 1}                       \\ \hline
+		\multirow{1}{*}{BMI} & 30              & rel               & \codenobg{BMI}         & \codenobg{branch on N = 1}                       \\ \hline
+		\multirow{1}{*}{BNE} & d0              & rel               & \codenobg{BNE}         & \codenobg{branch on Z = 0}                       \\ \hline
+		\multirow{1}{*}{BPL} & 10              & rel               & \codenobg{BPL}         & \codenobg{branch on N = 0}                       \\ \hline
+		\multirow{1}{*}{BVC} & 50              & rel               & \codenobg{BVC}         & \codenobg{branch on V = 0}                       \\ \hline
+		\multirow{1}{*}{BVS} & 70              & rel               & \codenobg{BVS}         & \codenobg{branch on V = 1}                       \\ \hline
 		\multicolumn{5}{|c|}{\textbf{Instruções de controle}}                                                                                  \\ \hline
-		\multirow{1}{*}{JMP} & 2f              & abs               & \codenobg{JMP HHLL}    & \codenobg{PCL <= LL}\newline\codenobg{PCH <= HH} \\ \hline
-		\multirow{1}{*}{NOP} & 2f              & impl              & \codenobg{NOP}         &                                                  \\ \hline
-		\multirow{1}{*}{HLT} & 2f              & impl              & \codenobg{HLT}         &                                                  \\ \hline
+		\multirow{1}{*}{JMP} & 6c              & abs               & \codenobg{JMP HHLL}    & \codenobg{PCL <= LL}\newline\codenobg{PCH <= HH} \\ \hline
+		\multirow{1}{*}{NOP} & ea              & impl              & \codenobg{NOP}         &                                                  \\ \hline
+		\multirow{1}{*}{HLT} & db              & impl              & \codenobg{HLT}         &                                                  \\ \hline
 	\end{longtable}
 	\legend{Fonte: Autoria Própria}
 \end{center}
-
 
 
 \section{O \emph{datapath} da implementação}
