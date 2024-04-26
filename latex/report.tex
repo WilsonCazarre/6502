@@ -176,12 +176,12 @@
 % resumo na língua vernácula (obrigatório)
 \setlength{\absparsep}{18pt} % ajusta o espaçamento dos parágrafos do resumo
 \begin{resumo}
-	Esse trabalho irá apresentar o desenvolvimento de uma microprocessador capaz
-	de executar um subconjunto das instruções do microprocessador 6502. O 6502 foi
-	um microprocessador lançado em 1975 e redefiniu o que um computador pessoal
-	podia fazer, sendo usado em muitos dispositivos populares da época como o NES
-	e o Apple I. O desenvolvimento do mesmo será realizado em VHDL e implementado
-	em um FPGA. O trabalho também apresenta os detalhes da arquitetura
+	Esse trabalho irá apresentar o desenvolvimento de um microprocessador capaz
+	de executar um subconjunto das 6502 desenvolvido pela MOS Technology.
+	O 6502 foi um microprocessador lançado em 1975 e redefiniu o que um computador
+	pessoal podia fazer, sendo usado em muitos dispositivos populares da época
+	como o NES e o Apple I. O desenvolvimento do mesmo será realizado em VHDL e
+	implementado em um FPGA. O trabalho também apresenta os detalhes da arquitetura
 	implementada, bem como seu \emph{datapath}, modos de endereçamento e ciclos de
 	execução. \newline\newline
 	\textbf{Palavras-chaves}: 6502. NES. FPGA. Verilog.
@@ -224,9 +224,6 @@ dispositivo FPGA. Esse relatório irá apresentar a fundamentação, bem como to
 o processo de desenvolvimento de um sistema computacional baseado no
 microprocessador 6502.
 
-
-\section{Motivação}
-mandaram eu fazer esse trabalho ou eu seria reprovado na matéria
 \section{Metodologia}
 O trabalho apresentado será desenvolvido no \emph{software} Quartus\copyright
 Prime da Intel e implementado na linguagem de descrição de \emph{hardware} VHDL.
@@ -234,7 +231,7 @@ O circuito será implementado usando a abstração de
 \emph{Register-Transfer Level} onde o fluxo de dados no circuito é representado
 como registradores e as unidades de lógica combinacional que determinam seus
 estados. O projeto então será testado em bancada onde deverá ser capaz de
-executar qualquer tipo de lógica definida como "computável" (ou seja, ter a
+executar qualquer tipo de lógica definida como ``computável'' (ou seja, ter a
 mesma funcionalidade de uma Máquina de Turing).
 
 
@@ -267,7 +264,7 @@ digital e é composto dos seguintes componentes (\autoref{fig:vonNeumann}):
 \begin{enumerate}
 	\item Uma unidade capaz de executar operações aritméticas ;
 	\item Uma unidade lógica de controle;
-	\item Uma memória de "tamanho considerável". Essa memória guarda as
+	\item Uma memória de ``tamanho considerável''. Essa memória guarda as
 	      instruções e dados do programa.
 	\item Dispositivos de entrada e saída.
 \end{enumerate}
@@ -291,7 +288,7 @@ acessar, e um barramento de dados por onde a informação se propaga.
 É importante também destacar que ainda que seja possível fisicamente separar
 as memórias de dados e de programa (o que de fato é algo que será feito) durante
 esse trabalho, do ponto de vista do processador essa não é uma diferença efetiva.
-O processador apenas consegue "enxergar" um único barramento de dados e de
+O processador apenas consegue ``enxergar'' um único barramento de dados e de
 endereço, não importa quais dispositivos estejam conectados diretamente.
 
 \section{Microprocessador 6502} \label{sec:6502}
@@ -404,7 +401,7 @@ valor do registrador (X ou Y) é somado ao endereço de acesso.
 Idêntico ao endereçamento absoluto, exceto que apenas um byte é lido da memória
 (o byte menos significativo). O byte mais significativo é inferido como 0
 \autoref{fig:address:zpg}. Logo esse modo de endereçamento sempre retorna um
-dado localizado na primeira "página" da memória (os primeiros 256 bytes).
+dado localizado na primeira ``página'' da memória (os primeiros 256 bytes).
 \begin{figure}[h]
 	\centering
 	\caption{Endereçamento \emph{Zero-Page}} \label{fig:address:zpg}
@@ -618,10 +615,17 @@ desempenham funções específicas no processador:
 	      das instruções com os modos de endereçamento deslocados.
 \end{itemize}
 
+
 \begin{figure}[h]
 	\centering
 	\caption{Datapath do 6502 implementado} \label{fig:6502}
 	\includegraphics[scale=0.22]{../assets/img/6502.png}
+\end{figure}
+
+
+\begin{figure}[h]
+
+
 	\legend{Fonte: Autoria própria}
 \end{figure}
 
