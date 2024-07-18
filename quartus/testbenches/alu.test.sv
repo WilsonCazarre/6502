@@ -5,11 +5,15 @@ module alu_test ();
   reg                       [7:0] input_a;
   reg                       [7:0] input_b;
   control_signals::alu_op_t       operation;
-  wire                            flag_overflow;
-  wire                            flag_zero;
-  wire                            flag_neg;
-  wire                            flag_carry;
-  wire                      [7:0] alu_out;
+  reg                             flag_overflow;
+  reg                             flag_zero;
+  reg                             flag_neg;
+  reg                             flag_carry;
+  reg                       [7:0] alu_out;
+
+  logic                           clk;
+  initial clk = 1;
+  always #10 clk = ~clk;
 
   alu alu (
       .carry_in(carry_in),
@@ -23,33 +27,31 @@ module alu_test ();
       .alu_out(alu_out)
   );
 
-
   initial begin
     operation = control_signals::ALU_ADD;
     carry_in  = 1'b1;
     input_a   = 8'h5;
     input_b   = 8'h5;
-    #5;
+    repeat (1) @(posedge clk);
 
     operation = control_signals::ALU_SUB;
     carry_in  = 1'b0;
     input_a   = 8'h4;
     input_b   = 8'h5;
-    #5;
+    repeat (1) @(posedge clk);
 
     input_a = 8'h3;
     input_b = 8'h8;
-    #5;
+    repeat (1) @(posedge clk);
 
-    operation = control_signals::ALU_AND;
-    input_a   = 8'b0011_0011;
-    input_b   = 8'hFF;
-    #5;
+    input_a = 8'h5;
+    input_b = 8'h5;
+    repeat (1) @(posedge clk);
 
     operation = control_signals::ALU_SHIFT_LEFT;
     input_a   = 8'b1100_0011;
     input_b   = 8'b1;
-    #5;
+    repeat (1) @(posedge clk);
 
     $stop;
   end

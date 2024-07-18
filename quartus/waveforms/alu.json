@@ -1,0 +1,41 @@
+{
+  "signal": [
+    { "name": "clk", "wave": "ppppp" },
+
+    [
+      "Entradas",
+      { "name": "carry_in", "wave": "10..." },
+      {
+        "name": "input_a",
+        "wave": "44444",
+        "data": ["5", "4", "3", "5", "c3"]
+      },
+      {
+        "name": "input_b",
+        "wave": "4.444",
+        "data": ["5", "8", "5", "1"]
+      },
+      {
+        "name": "operation",
+        "wave": "66..6",
+        "data": ["ADD", "SUB", "SHIFT_LEFT"]
+      }
+    ],
+    {},
+    [
+      "Saídas",
+      {
+        "name": "alu_out",
+        "wave": "77777",
+        "data": ["b", "ff", "fb", "0", "86"]
+      },
+      { "name": "flag_carry", "wave": "01.01" },
+      { "name": "flag_neg", "wave": "01.01" },
+      { "name": "flag_overflow", "wave": "01.0." },
+      { "name": "flag_zero", "wave": "0..10" }
+    ]
+  ],
+  "config": {
+    "hscale": 3
+  }
+}

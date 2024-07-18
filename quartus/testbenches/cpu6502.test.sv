@@ -1,6 +1,6 @@
 module cpu6502_test ();
   logic clk;
-  initial clk = 0;
+  initial clk = 1;
   always #10 clk = ~clk;
 
   logic reset;
@@ -21,9 +21,10 @@ module cpu6502_test ();
     reset   = 1;
     data_in = instruction_set::OpcNOP;
     repeat (1) @(posedge clk);
-    reset   = 0;
-    data_in = instruction_set::OpcLDA_imm;
+    reset = 0;
     repeat (1) @(posedge clk);
+    data_in = instruction_set::OpcLDA_imm;
+    repeat (2) @(posedge clk);
     data_in = 8'h20;
     repeat (1) @(posedge clk);
     data_in = instruction_set::OpcADC_imm;

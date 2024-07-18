@@ -1,11 +1,10 @@
 module cpu6502 (
-    input  wire reset,
-    input  wire clk_in,
-    output reg  READ_write,
-
-    input  reg [ 7:0] data_in,
-    output reg [ 7:0] data_out,
-    output reg [15:0] address_out
+    input logic reset,
+    input logic clk_in,
+    output logic READ_write,
+    input logic [7:0] data_in,
+    output logic [7:0] data_out,
+    output logic [15:0] address_out
 );
 
 
@@ -20,8 +19,6 @@ module cpu6502 (
 
     InstructionStateEndMarker
   } instruction_state_t;
-
-  parameter OPCODE_NOP = 8'hea, OPCODE_WRT = 8'heb;
 
   // ---------------------------------------------------------
   // ------------------ CONTROL SIGNALS ----------------------
@@ -186,7 +183,6 @@ module cpu6502 (
         case (instruction_register)
           instruction_set::OpcNOP: begin
             next_instr_state = InstructionFetch;
-
           end
           instruction_set::OpcLDA_imm: begin
             next_instr_state = InstructionFetch;

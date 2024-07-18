@@ -27,33 +27,46 @@
 \usepackage{multicol}
 \usepackage{multirow}
 \usepackage{longtable}
+\usepackage[inkscapelatex=false]{svg}
 
 \usepackage{float} % para utilizar o H de tabelas e figuras e mante-las no lugar
 % ---
 \usepackage{xcolor}
 % Definindo novas cores
 \definecolor{verde}{rgb}{0,0.5,0}
-\usepackage{listings}
-\lstset{
-  language=Verilog, %indicar a linguagem utilizada
-  basicstyle=\ttfamily\tiny, 
-  keywordstyle=\color{blue}, 
-  stringstyle=\color{verde}, 
-  commentstyle=\color{gray}, 
-  extendedchars=true, 
-  showspaces=false, 
-  showstringspaces=false, 
-  numbers=left,
-  numberstyle=\tiny,
-  breaklines=true, 
-  backgroundcolor=\color{green!10},
-  breakautoindent=true, 
-  captionpos=b,
-  xleftmargin=0pt,
-}
-
-\usepackage{xcolor}
 \definecolor{light-gray}{gray}{0.95}
+\definecolor{blue}{RGB}{41,5,195}
+\usepackage{minted}
+\usepackage{caption}
+\usemintedstyle{abap}
+\setminted[systemverilog]{linenos=false, autogobble}
+\newenvironment{longlisting}{\captionsetup{type=listing}}{}
+\renewcommand{\listingscaption}{Código}
+% \renewcommand{\listingscaption}{Código}
+\renewcommand{\listoflistingscaption}{Lista de Códigos Fonte}
+\providecommand*{\listingautorefname}{Código}
+
+
+% \usepackage{listings}
+% \lstset{
+%   language=Verilog, %indicar a linguagem utilizada
+%   basicstyle=\ttfamily\tiny, 
+%   keywordstyle=\color{blue}, 
+%   stringstyle=\color{verde}, 
+%   commentstyle=\color{gray}, 
+%   extendedchars=true, 
+%   showspaces=false, 
+%   showstringspaces=false, 
+%   numbers=left,
+%   numberstyle=\tiny,
+%   breaklines=true, 
+%   % backgroundcolor=\color{green!10},
+%   breakautoindent=true, 
+%   captionpos=b,
+%   xleftmargin=0pt,
+% }
+
+
 \newcommand{\code}[1]{\colorbox{light-gray}{\texttt{#1}}}
 \newcommand{\codenobg}[1]{\texttt{#1}}
 
@@ -111,7 +124,7 @@
 % Configurações de aparência do PDF final
 
 % alterando o aspecto da cor azul
-\definecolor{blue}{RGB}{41,5,195}
+
 
 % informações do PDF
 \makeatletter
@@ -145,6 +158,7 @@
 \makeindex
 % ---
 
+
 % ------------------------------------------------
 % Início do documento
 \begin{document}
@@ -171,6 +185,7 @@
 \imprimirfolhaderosto*
 % ---
 
+
 % ---
 % RESUMO
 % resumo na língua vernácula (obrigatório)
@@ -184,7 +199,7 @@
 	implementado em um FPGA. O trabalho também apresenta os detalhes da arquitetura
 	implementada, bem como seu \emph{datapath}, modos de endereçamento e ciclos de
 	execução. \newline\newline
-	\textbf{Palavras-chaves}: 6502. NES. FPGA. Verilog.
+	\textbf{Palavras-chaves}: 6502. NES. FPGA. Verilog. SystemVerilog
 	\noindent
 \end{resumo}
 
@@ -202,6 +217,7 @@
 \clearpage
 % ---
 
+\listoflistings
 
 %SUMÁRIO É OBRIGATÓRIO
 % inserir o sumario
@@ -226,8 +242,8 @@ microprocessador 6502.
 
 \section{Metodologia}
 O trabalho apresentado será desenvolvido no \emph{software} Quartus\copyright
-Prime da Intel e implementado na linguagem de descrição de \emph{hardware} VHDL.
-O circuito será implementado usando a abstração de
+Prime da Intel e implementado na linguagem de descrição de \emph{hardware}
+SystemVerilog. O circuito será implementado usando a abstração de
 \emph{Register-Transfer Level} onde o fluxo de dados no circuito é representado
 como registradores e as unidades de lógica combinacional que determinam seus
 estados. O projeto então será testado em bancada onde deverá ser capaz de
@@ -500,6 +516,13 @@ bloco do design deve desempenhar uma (e apenas uma) de duas possíveis funções
 
 % \section{Completude de Turing}
 
+\section{Metodologia de Testes}
+
+Para garantir o funcionamento das partes individuais do processador, a ferramenta
+de simulação digital ModelSim da Intel foi utilizada.
+
+Um template para os testbenches está disponível no \autoref{attach:template}
+
 \chapter{Desenvolvimento}
 
 O desenvolvimento da CPU se deu em algumas etapas. Primeiramente o conjunto de
@@ -622,13 +645,6 @@ desempenham funções específicas no processador:
 	\includegraphics[scale=0.22]{../assets/img/6502.png}
 \end{figure}
 
-
-\begin{figure}[h]
-
-
-	\legend{Fonte: Autoria própria}
-\end{figure}
-
 \subsection{Contador de Programa (PCH e PCL)}
 
 O contador de programa é usado para endereçar o espaço de 16-bits de memória
@@ -679,12 +695,156 @@ lógicas e aritméticas do processador. Além disso, registradores auxiliares s�
 acoplados a unidade: AI e BI armazenam os valores de entrada e AR armazena o
 valor de saída.
 
+\section{Código Fonte do Processador}
+
+O código do processador é apresentado nessa seção. Os componentes de \emph{datapath}
+são descritos em \nameref{code:alu}, \nameref{code:program_counter},
+\nameref{code:register} e \nameref{code:status_register}. O \nameref{code:register}
+é usado para implementar os registradores de propósito geral Acumulador, X e Y.
+
+\nameref{code:bus_sources}, \nameref{code:control_signals} e \nameref{code:instruction_set} são usados
+para providenciar constantes que são usadas pelos diversos módulos do projeto.
+
+\begin{longlisting}
+	\caption[Enums para barramentos]{bus{\_}sources.sv}
+	\inputminted{systemverilog}{../quartus/synthesis/enums/bus_sources.sv}
+	\label{code:bus_sources}
+\end{longlisting}
+
+\begin{longlisting}
+	\caption[Enums para sinais de controle]{control{\_}signals.sv}
+	\inputminted{systemverilog}{../quartus/synthesis/enums/control_signals.sv}
+	\label{code:control_signals}
+\end{longlisting}
+
+\begin{longlisting}
+	\caption[Enums para conjunto de instrução]{instruction{\_}set.sv}
+	\inputminted{systemverilog}{../quartus/synthesis/enums/instruction_set.sv}
+	\label{code:instruction_set}
+\end{longlisting}
+
+\begin{longlisting}
+	\caption[Módulo ULA]{alu.sv}
+	\inputminted[firstline=5]{systemverilog}{../quartus/synthesis/alu.sv}
+	\label{code:alu}
+\end{longlisting}
+
+
+\begin{longlisting}
+	\caption[Módulo Contador de Programa]{program{\_}counter.sv}
+	\inputminted{systemverilog}{../quartus/synthesis/program_counter.sv}
+	\label{code:program_counter}
+\end{longlisting}
+
+\begin{longlisting}
+	\caption[Módulo Registrador]{register.sv}
+	\inputminted{systemverilog}{../quartus/synthesis/register.sv}
+	\label{code:register}
+\end{longlisting}
+
+\begin{longlisting}
+	\caption[Módulo Processador]{cpu6502.sv}
+	\inputminted{systemverilog}{../quartus/synthesis/cpu6502.sv}
+	\label{code:cpu}
+\end{longlisting}
+
+\begin{longlisting}
+	\caption[Módulo Registrador de Status]{status{\_}register.sv}
+	\inputminted{systemverilog}{../quartus/synthesis/status_register.sv}
+	\label{code:status_register}
+\end{longlisting}
+
+
+
+\section{Testbenches}\label{sec:testbenches}
+
+Além dos módulos sintetizáveis apresentados na sessão anterior, também foram
+desenvolvidos módulos de \emph{testbench}, com o objetivo de testar os módulos em um ambiente
+digital. Note que para o teste de módulo da ULA, o clock é incluído, apesar de não ser necessário
+visto que a ULA em si não utiliza esse sinal, ele está lá apenas para controlar a passagem de tempo
+durante a simulação.
+
+\begin{longlisting}
+	\caption[Testbench da ULA]{alu.test.sv}
+	\inputminted{systemverilog}{../quartus/testbenches/alu.test.sv}
+	\label{code:alu_test}
+\end{longlisting}
+
+\begin{longlisting}
+	\caption[Testbench do Contador de Programa]{program{\_}counter.test.sv}
+	\inputminted{systemverilog}{../quartus/testbenches/program_counter.test.sv}
+	\label{code:program_counter_test}
+\end{longlisting}
+
+\begin{longlisting}
+	\caption[Testbench do Módulo Registrador]{register.test.sv}
+	\inputminted{systemverilog}{../quartus/testbenches/register.test.sv}
+	\label{code:register_test}
+\end{longlisting}
+
 \chapter{Resultados Obtidos e Discussões}
 
 
+% \begin{figure}[h]
+% 	\centering
+% 	\caption{ALU.sv} \label{code:alu}
+
+% \end{figure}
+
+
+\section{Formas de onda}
+
+Todas as formas de onda foram geradas a partir das testbenches apresentadas na \autoref{sec:testbenches}.
+
+
+\begin{figure}[h]
+	\centering
+	\caption{Teste da ULA} \label{fig:wave:alu}
+	\includesvg[width=\columnwidth]{../assets/waveforms/alu}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\caption{Teste do Contador de Programa} \label{fig:wave:pc}
+	\includesvg[width=\columnwidth]{../assets/waveforms/pc}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\caption{Teste do Registrador} \label{fig:wave:register}
+	\includesvg[width=\columnwidth]{../assets/waveforms/register}
+\end{figure}
+
+O teste da \autoref{fig:wave:cpu} é um teste de integração, onde podemos ver o funcionamento
+básico do processador.
+Inicialmente colocamos o opcode da operação \code{NOP} (\code{hea}) no barramento de dados (\code{data{\_}in}).
+Podemos ver que o processador realiza os ciclos de \emph{Fetch} e \emph{Decode} e depois volta ao ciclo de \emph{Fetch}
+já que a operação \code{NOP} não precisa de nenhum ciclo extra de execução.
+
+Em seguida, o código \code{ha9} é lido do barramento de dados, o que corresponde a instrução \code{LDA} com imediato.
+O valor \code{h20} é lido e observamos que ele é colocado no Registrador A (\code{RegAccumulator/current{\_}value}).
+
+Posteriormente, o opcode \code{h69} é lido, que corresponde a instrução \code{ADC} com imediato. Essa instrução
+deve ler um valor imediato e somar com o valor atual do Registrador A.
+Podemos ver o valor final do Registrador A atualizado como \code{h25} no final da simulação. Esse era
+o valor esperado já que carregamos o registrador com \code{h20} e depois somamos mais \code{h5} ao seu conteúdo.
+
+
+\begin{figure}[h]
+	\centering
+	\caption{Teste da Unidade de Processamento} \label{fig:wave:cpu}
+	\includesvg[width=\columnwidth]{../assets/waveforms/cpu}
+\end{figure}
+
 \chapter{Considerações Finais}
 
+Em seu estado atual o processador pode executar 3 opcodes do conjunto de instrução.
+Vale também destacar que em nenhum dos testes apresentados o processador realiza acesso a uma memória.
+Todos as operações foram colocadas no barramento de dados pelo próprio simulador.
+Isso se deu ao fato de que o processador ainda não é capaz de executar o endereçamento absoluto.
 
+Como desenvolvimento para os próximos ponto de controle, os demais opcodes serão implementados,
+bem como acesso a memória externa será testado.
 
 % ---
 % Finaliza a parte no bookmark do PDF
@@ -729,10 +889,9 @@ valor de saída.
 % Inicia os anexos
 % ---
 \begin{anexosenv}
-
+	\chapter{Template para testbenches}\label{attach:template}
+	\inputminted{systemverilog}{../quartus/testbenches/template.test.sv}
 \end{anexosenv}
-
-
 
 
 \clearpage

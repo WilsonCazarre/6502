@@ -1,0 +1,144 @@
+$date
+	Wed Jul 17 20:13:07 2024
+$end
+$version
+	ModelSim Version 2020.1
+$end
+$timescale
+	1ns
+$end
+$scope module cpu6502_test $end
+$var reg 1 ! clk $end
+$var reg 1 " reset $end
+$var reg 1 # READ_write $end
+$var reg 8 $ data_in [7:0] $end
+$var reg 8 % data_out [7:0] $end
+$var reg 16 & address_out [15:0] $end
+$scope module cpu6502 $end
+$var integer 32 ' instruction_register $end
+$var integer 32 ( current_instr_state $end
+$scope module RegAccumulator $end
+$var reg 8 1 current_value [7:0] $end
+$upscope $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+#0
+b1 !
+b1 "
+b1 #
+b11101010 $
+b11101010 %
+b0 &
+b0 '
+bx1 (
+b0 1
+b1 #
+b11101010 %
+b0 1
+bx1 (
+b0 '
+b0 &
+#10
+b0 !
+#20
+b1 !
+b0 "
+#30
+b0 !
+#40
+b1 !
+b10101001 $
+b10101001 %
+bx (
+bx '
+b1 &
+#50
+b0 !
+#60
+b1 !
+bx1 (
+b10 &
+#70
+b0 !
+#80
+b1 !
+b100000 $
+b100000 %
+bx (
+bx0xxxxxx '
+b11 &
+#90
+b0 !
+#100
+b1 !
+b1101001 $
+b1101001 %
+b100000 1
+bx1 (
+b100 &
+#110
+b0 !
+#120
+b1 !
+b101 $
+b101 %
+bx (
+bx '
+b101 &
+#130
+b0 !
+#140
+b1 !
+bx0xx (
+b110 &
+b100000 %
+#150
+b0 !
+#160
+b1 !
+bx0xx (
+#170
+b0 !
+#180
+b1 !
+bx0xx (
+b100101 %
+#190
+b0 !
+#200
+b1 !
+b100101 1
+bx1 (
+b101 %
+#210
+b0 !
+#220
+b1 !
+bx (
+bx '
+b111 &
+#230
+b0 !
+#240
+b1 !
+b1000 &
+#250
+b0 !
+#260
+b1 !
+b1001 &
+#270
+b0 !
+#280
+b1 !
+b1010 &
+#290
+b0 !
+#300
+b1 !
+b1011 &
+#310
+b0 !
+#320
+b1 !

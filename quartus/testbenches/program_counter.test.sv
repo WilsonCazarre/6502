@@ -2,17 +2,17 @@
 
 module program_counter_test ();
 
-  reg [7:0] PCL_in;
-  reg [7:0] PCH_in;
-  reg clk;
-  reg inc_enable;
-  reg load;
-  reg reset;
+  logic [7:0] PCL_in;
+  logic [7:0] PCH_in;
+  logic clk;
+  logic inc_enable;
+  logic load;
+  logic reset;
 
-  wire [7:0] PCL_out;
-  wire [7:0] PCH_out;
+  logic [7:0] PCL_out;
+  logic [7:0] PCH_out;
 
-  ProgramCounter pc (
+  program_counter pc (
       .PCL_in(PCL_in),
       .PCH_in(PCH_in),
       .clk(clk),
@@ -23,7 +23,7 @@ module program_counter_test ();
       .PCH_out(PCH_out)
   );
 
-  initial clk = 0;
+  initial clk = 1;
 
   always #10 clk = ~clk;
 
@@ -43,7 +43,10 @@ module program_counter_test ();
     inc_enable = 1;
     load = 0;
 
-    repeat (20) @(posedge clk);
+    repeat (8) @(posedge clk);
+    inc_enable = 0;
+
+    repeat (2) @(posedge clk);
     $stop;
   end
 endmodule

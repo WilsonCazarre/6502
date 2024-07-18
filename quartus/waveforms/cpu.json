@@ -1,0 +1,17 @@
+{
+  "signal": [
+    {"name":"cpu6502_test.clk","wave":"pppppppppppppp"},
+    {"name":"cpu6502_test.reset","wave":"10............"},
+    {"name":"cpu6502_test.READ_write","wave":"1............."},
+    {"name":"cpu6502_test.data_in","wave":"77777.........","data":["ea","a9","20","69","5"]},
+    {"name":"cpu6502_test.data_out","wave":"777777.77.....","data":["ea","a9","20","69","5","20","25","5"]},
+    {"name":"cpu6502_test.address_out","wave":"7.7777...77777","data":["0","1","2","3","4","5","6","7","8","9"]},
+    {"name":"cpu6502_test.cpu6502.data_in","wave":"1.0..........."},
+    {"name":"cpu6502_test.cpu6502.instruction_register","wave":"7.6.6....4....","data":["0","LDA","ADC","5"]},
+    {"name":"cpu6502_test.cpu6502.current_instr_state","wave":"8.88888888....","data":["Fetch","Decode","Fetch","Decode","Cycle2","Cycle3","Cycle4","Fetch","Decode"]},
+    {"name":"cpu6502_test.cpu6502.RegAccumulator.current_value","wave":"7..7....7.....","data":["0","20","25"]}
+  ],
+  "config": { 
+  	"hscale": 2
+  }
+}

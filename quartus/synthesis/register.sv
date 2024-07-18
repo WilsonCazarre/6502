@@ -6,7 +6,6 @@ module register (
     input logic load,
     input logic reset
 );
-
   reg [7:0] current_value;
 
   always @(posedge clk) begin

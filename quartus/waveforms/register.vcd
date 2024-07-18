@@ -1,0 +1,44 @@
+$date
+	Wed Jul 17 19:56:05 2024
+$end
+$version
+	ModelSim Version 2020.1
+$end
+$timescale
+	1ns
+$end
+$scope module register_test $end
+$var reg 1 ! clk $end
+$var reg 1 " reset $end
+$var reg 1 # load $end
+$var reg 8 $ data_in [7:0] $end
+$var reg 8 % data_out [7:0] $end
+$upscope $end
+$enddefinitions $end
+#0
+b1 "
+b0 #
+b0 %
+b11101010 $
+b1 !
+b0 %
+#10
+b0 !
+#20
+b1 !
+b0 "
+b1 #
+#30
+b0 !
+#40
+b1 !
+b0 #
+b11101010 %
+#50
+b0 !
+#60
+b1 !
+#70
+b0 !
+#80
+b1 !
