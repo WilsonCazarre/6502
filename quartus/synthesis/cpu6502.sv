@@ -85,13 +85,6 @@ module cpu6502 (
   // ALU + registers
   logic [7:0] alu_input_a, alu_input_b;
   logic alu_overflow, alu_zero, alu_negative, alu_carry;
-  register InputA (
-      .data_in(data_bus),
-      .data_out(alu_input_a),
-      .clk(clk_in),
-      .load(ctrl_signals[control_signals::CtrlLoadInputA]),
-      .reset(reset)
-  );
   register InputB (
       .data_in(data_bus),
       .data_out(alu_input_b),
@@ -100,6 +93,7 @@ module cpu6502 (
       .reset(reset)
   );
 
+  assign alu_input_a = data_bus_inputs[bus_sources::DataBusSrcRegAccumulator];
   alu alu (
       .carry_in(1'b0),
       .input_a(alu_input_a),
@@ -122,8 +116,8 @@ module cpu6502 (
       .PCL_in(address_low_bus),
       .PCH_in(address_high_bus),
       .clk(clk_in),
-      .inc_enable(ctrl_signals[control_signals::CtrlPcIncEnable]),
-      .load(ctrl_signals[control_signals::CtrlPcLoad]),
+      .inc_enable(ctrl_signals[control_signals::CtrlIncEnablePc]),
+      .load(ctrl_signals[control_signals::CtrlLoadPc]),
       .reset(reset),
       .PCL_out(address_low_bus_inputs[bus_sources::AddressLowSrcPcLow]),
       .PCH_out(address_high_bus_inputs[bus_sources::AddressHighSrcPcHigh])
@@ -138,6 +132,22 @@ module cpu6502 (
       .clk(clk_in),
       .load(ctrl_signals[control_signals::CtrlLoadInstReg]),
       .reset(reset)
+  );
+
+  // Status Register
+  logic [7:0] status_flags;
+  status_register status_register (
+      .load         (ctrl_signals[control_signals::CtrlLoadInstReg]),
+      .clk          (clk),
+      .reset        (reset),
+      .carry_in     (alu_carry),
+      .zero_in      (alu_zero),
+      .negative_in  (alu_negative),
+      .overflow_in  (alu_overflow),
+      .flag_carry   (status_flags[StatusFlagCarry]),
+      .flag_zero    (status_flags[StatusFlagZero]),
+      .flag_negative(status_flags[StatusFlagNegative]),
+      .flag_overflow(status_flags[StatusFlagOverflow])
   );
 
   // --------------------------------------------------------
@@ -161,7 +171,7 @@ module cpu6502 (
     ctrl_signals[control_signals::CtrlLoadInputB] = 0;
     ctrl_signals[control_signals::CtrlPcLoad] = 0;
     ctrl_signals[control_signals::CtrlLoadInstReg] = 0;
-    ctrl_signals[control_signals::CtrlPcIncEnable] = 0;
+    ctrl_signals[control_signals::CtrlIncEnablePc] = 0;
 
     alu_op = control_signals::ALU_ADD;
 
@@ -176,16 +186,20 @@ module cpu6502 (
       InstructionFetch: begin
         next_instr_state = InstructionDecode;
         ctrl_signals[control_signals::CtrlLoadInstReg] = 1;
-        ctrl_signals[control_signals::CtrlPcIncEnable] = 1;
+        ctrl_signals[control_signals::CtrlIncEnablePc] = 1;
       end
       InstructionDecode: begin
-        ctrl_signals[control_signals::CtrlPcIncEnable] = 1;
+        ctrl_signals[control_signals::CtrlIncEnablePc] = 1;
         case (instruction_register)
           instruction_set::OpcNOP: begin
             next_instr_state = InstructionFetch;
           end
           instruction_set::OpcLDA_imm: begin
             next_instr_state = InstructionFetch;
+            ctrl_signals[control_signals::CtrlLoadAccumutator] = 1;
+          end
+          instruction_set::OpcLDA_abs: begin
+            next_instr_state = InstructionCycle2;
             ctrl_signals[control_signals::CtrlLoadAccumutator] = 1;
           end
           instruction_set::OpcADC_imm: begin

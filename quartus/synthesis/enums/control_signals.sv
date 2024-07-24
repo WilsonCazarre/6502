@@ -16,8 +16,9 @@ package control_signals;
     CtrlLoadInputA = 3,
     CtrlLoadInputB = 4,
     CtrlLoadInstReg = 5,
-    CtrlPcIncEnable = 6,
-    CtrlPcLoad = 7,
+    CtrlIncEnablePc = 6,
+    CtrlLoadPc = 7,
+    CtrlLoadStatusReg = 8,
 
     CtrlSignalEndMarker
   } ctrl_signals_t;
@@ -27,8 +28,8 @@ package control_signals;
     StatusFlagOverflow,
     StatusFlagNegative,
     StatusFlagZero,
-    StatusFlagEndMarker
 
+    StatusFlagEndMarker
   } status_flags_t;
 
 endpackage
