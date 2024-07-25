@@ -6,6 +6,7 @@ package bus_sources;
     DataBusSrcRegAluResult,
 
     DataBusSrcFF,
+    DataBusSrcZero,
 
     DataBusSrcDataIn,
     DataBusSrcDataInLatch,

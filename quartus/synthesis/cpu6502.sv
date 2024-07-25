@@ -42,6 +42,7 @@ module cpu6502 (
   assign data_bus_inputs[bus_sources::DataBusSrcDataIn] = data_in;
   assign data_bus_inputs[bus_sources::DataBusSrcDataInLatch] = data_in_latch;
   assign data_bus_inputs[bus_sources::DataBusSrcFF] = 8'hff;
+  assign data_bus_inputs[bus_sources::DataBusSrcZero] = 8'h00;
 
   // ---------------------------------------------------------------
   // ------------------ Datapath Components ------------------------
@@ -88,6 +89,13 @@ module cpu6502 (
   // ALU + registers
   logic [7:0] alu_input_a, alu_input_b;
   logic alu_overflow, alu_zero, alu_negative, alu_carry;
+  register InputA (
+      .data_in(data_bus),
+      .data_out(alu_input_a),
+      .clk(clk_in),
+      .load(ctrl_signals[control_signals::CtrlLoadInputA]),
+      .reset(reset)
+  );
   register InputB (
       .data_in(data_bus),
       .data_out(alu_input_b),
@@ -96,7 +104,6 @@ module cpu6502 (
       .reset(reset)
   );
 
-  assign alu_input_a = data_bus_inputs[bus_sources::DataBusSrcRegAccumulator];
   alu alu (
       .carry_in(1'b0),
       .input_a(alu_input_a),
@@ -130,21 +137,27 @@ module cpu6502 (
   logic status_flags[8];
   logic flag_carry, flag_zero, flag_negative, flag_overflow;
   assign status_flags[control_signals::StatusFlagCarry] = flag_carry;
-  assign status_flags[control_signals::StatusFlagOverflow] = flag_zero;
+  assign status_flags[control_signals::StatusFlagZero] = flag_zero;
   assign status_flags[control_signals::StatusFlagNegative] = flag_negative;
-  assign status_flags[control_signals::StatusFlagZero] = flag_overflow;
+  assign status_flags[control_signals::StatusFlagOverflow] = flag_overflow;
   status_register status_register (
-      .load         (ctrl_signals[control_signals::CtrlLoadStatusReg]),
-      .clk          (clk_in),
-      .reset        (reset),
-      .carry_in     (alu_carry),
-      .zero_in      (alu_zero),
-      .negative_in  (alu_negative),
-      .overflow_in  (alu_overflow),
-      .flag_carry   (flag_carry),
-      .flag_zero    (flag_zero),
-      .flag_negative(flag_negative),
-      .flag_overflow(flag_overflow)
+      .data_in        (data_bus),
+      .update_zero    (ctrl_signals[control_signals::CtrlUpdateFlagZero]),
+      .update_negative(ctrl_signals[control_signals::CtrlUpdateFlagNegative]),
+      .update_carry   (ctrl_signals[control_signals::CtrlUpdateFlagCarry]),
+      .update_overflow(ctrl_signals[control_signals::CtrlUpdateFlagOverflow]),
+      .set_carry      (ctrl_signals[control_signals::CtrlSetFlagCarry]),
+      .set_overflow   (ctrl_signals[control_signals::CtrlSetFlagOverflow]),
+      .clear_carry    (ctrl_signals[control_signals::CtrlClearFlagCarry]),
+      .clear_overflow (ctrl_signals[control_signals::CtrlClearFlagOverflow]),
+      .clk            (clk_in),
+      .reset          (reset),
+      .carry_in       (alu_carry),
+      .overflow_in    (alu_overflow),
+      .flag_carry     (flag_carry),
+      .flag_zero      (flag_zero),
+      .flag_negative  (flag_negative),
+      .flag_overflow  (flag_overflow)
   );
 
   // Instruction Register

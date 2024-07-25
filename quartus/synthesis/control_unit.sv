@@ -19,6 +19,7 @@ module control_unit (
     InstructionMem3,
     InstructionExec1,
     InstructionExec2,
+    InstructionExec3,
     InstructionInvalid,
     InstructionStateEndMarker
   } instruction_state_t;
@@ -54,17 +55,47 @@ module control_unit (
       end
       InstructionDecode: begin
         case (current_opcode)
-          instruction_set::OpcNOP_impl: impl_addr_mode();
-
           instruction_set::OpcADC_imm: imm_addr_mode();
           instruction_set::OpcADC_abs: abs_addr_mode();
+
+          instruction_set::OpcBCC_abs: abs_addr_mode();
+          instruction_set::OpcBCS_abs: abs_addr_mode();
+          instruction_set::OpcBEQ_abs: abs_addr_mode();
+          instruction_set::OpcBMI_abs: abs_addr_mode();
+          instruction_set::OpcBNE_abs: abs_addr_mode();
+          instruction_set::OpcBPL_abs: abs_addr_mode();
+          instruction_set::OpcBVC_abs: abs_addr_mode();
+          instruction_set::OpcBVS_abs: abs_addr_mode();
+
+          instruction_set::OpcCLC_impl: impl_addr_mode();
+
+          instruction_set::OpcCMP_imm: imm_addr_mode();
+          instruction_set::OpcCMP_abs: abs_addr_mode();
+
+          instruction_set::OpcJMP_abs: abs_addr_mode();
 
           instruction_set::OpcLDA_imm: imm_addr_mode();
           instruction_set::OpcLDA_abs: abs_addr_mode();
 
+          instruction_set::OpcLDX_imm: imm_addr_mode();
+          instruction_set::OpcLDX_abs: abs_addr_mode();
+
+          instruction_set::OpcLDY_imm: imm_addr_mode();
+          instruction_set::OpcLDY_abs: abs_addr_mode();
+
+          instruction_set::OpcNOP_impl: next_instr_state = InstructionFetch;
+
+          instruction_set::OpcSBC_imm: imm_addr_mode();
+          instruction_set::OpcSBC_abs: abs_addr_mode();
+
+          instruction_set::OpcSEC_impl: impl_addr_mode();
+
           instruction_set::OpcSTA_abs: abs_addr_mode();
 
-          instruction_set::OpcJMP_abs: abs_addr_mode();
+          instruction_set::OpcSTX_abs: abs_addr_mode();
+
+          instruction_set::OpcSTY_abs: abs_addr_mode();
+
           default: next_addr_mode = instruction_set::AddrModeImpl;
         endcase
       end
@@ -119,13 +150,20 @@ module control_unit (
 
   task impl_addr_mode();
     next_addr_mode = instruction_set::AddrModeImpl;
+    case (current_instr_state)
+      InstructionDecode: begin
+        next_instr_state = InstructionExec1;
+      end
+      default: begin
+        opcode_exec();
+      end
+    endcase
   endtask
 
   task invalid_state();
     $display("Invalid state");
     next_instr_state = InstructionInvalid;
     next_addr_mode   = instruction_set::AddrModeImpl;
-
   endtask
 
 
@@ -134,14 +172,129 @@ module control_unit (
   // --------------------------------------------------------
   task opcode_exec();
     case (current_opcode)
+      instruction_set::OpcADC_abs: exec_arithmetic_op(control_signals::ALU_ADD);
+
+      instruction_set::OpcBCC_abs: exec_branch();
+      instruction_set::OpcBCS_abs: exec_branch();
+      instruction_set::OpcBEQ_abs: exec_branch();
+      instruction_set::OpcBMI_abs: exec_branch();
+      instruction_set::OpcBNE_abs: exec_branch();
+      instruction_set::OpcBPL_abs: exec_branch();
+      instruction_set::OpcBVC_abs: exec_branch();
+      instruction_set::OpcBVS_abs: exec_branch();
+
+      instruction_set::OpcCLC_impl: exec_clc();
+
+      instruction_set::OpcCMP_imm: exec_cmp();
+      instruction_set::OpcCMP_abs: exec_cmp();
+
+      instruction_set::OpcJMP_abs: exec_jmp();
+
       instruction_set::OpcLDA_imm: exec_lda();
       instruction_set::OpcLDA_abs: exec_lda();
 
-      instruction_set::OpcADC_abs: exec_adc();
+      instruction_set::OpcLDX_imm: exec_ldx();
+      instruction_set::OpcLDX_abs: exec_ldx();
+
+      instruction_set::OpcLDY_imm: exec_ldy();
+      instruction_set::OpcLDY_abs: exec_ldy();
+
+      instruction_set::OpcSBC_imm: exec_arithmetic_op(control_signals::ALU_SUB);
+      instruction_set::OpcSBC_abs: exec_arithmetic_op(control_signals::ALU_SUB);
+
+      instruction_set::OpcSEC_impl: exec_sec();
 
       instruction_set::OpcSTA_abs: exec_sta();
 
-      instruction_set::OpcJMP_abs: exec_jmp();
+      instruction_set::OpcSTX_abs: exec_stx();
+
+      instruction_set::OpcSTY_abs: exec_sty();
+
+      default: invalid_state();
+    endcase
+  endtask
+
+  task exec_arithmetic_op(control_signals::alu_op_t alu_op_arg);
+    alu_op = alu_op_arg;
+    case (current_instr_state)
+      InstructionExec1: begin
+        next_instr_state = InstructionExec2;
+        current_data_bus_input = bus_sources::DataBusSrcDataIn;
+        ctrl_signals[control_signals::CtrlLoadInputB] = 1;
+      end
+      InstructionExec2: begin
+        next_instr_state = InstructionExec3;
+        current_data_bus_input = bus_sources::DataBusSrcRegAccumulator;
+        ctrl_signals[control_signals::CtrlLoadInputA] = 1;
+      end
+      InstructionExec3: begin
+        next_instr_state = InstructionFetch;
+        current_data_bus_input = bus_sources::DataBusSrcRegAluResult;
+        ctrl_signals[control_signals::CtrlLoadAccumutator] = 1;
+        ctrl_signals[control_signals::CtrlUpdateFlagNegative] = 1;
+        ctrl_signals[control_signals::CtrlUpdateFlagZero] = 1;
+        ctrl_signals[control_signals::CtrlUpdateFlagCarry] = 1;
+        ctrl_signals[control_signals::CtrlUpdateFlagOverflow] = 1;
+      end
+      default: invalid_state();
+    endcase
+  endtask
+
+  task exec_branch();
+    case (current_instr_state)
+      InstructionExec1: begin
+        next_instr_state = InstructionFetch;
+        ctrl_signals[control_signals::CtrlIncEnablePc] = 0;
+        ctrl_signals[control_signals::CtrlLoadPc] = 1;
+        if (current_opcode[5]) begin
+          ctrl_signals[control_signals::CtrlLoadPc] = status_flags[current_opcode[7:6]];
+        end else begin
+          ctrl_signals[control_signals::CtrlLoadPc] = !status_flags[current_opcode[7:6]];
+        end
+      end
+      default: invalid_state();
+    endcase
+  endtask
+
+  task exec_clc();
+    case (current_instr_state)
+      InstructionExec1: begin
+        next_instr_state = InstructionFetch;
+        ctrl_signals[control_signals::CtrlClearFlagCarry] = 1;
+      end
+    endcase
+  endtask
+
+  task exec_cmp();
+    alu_op = control_signals::ALU_SUB;
+    case (current_instr_state)
+      InstructionExec1: begin
+        next_instr_state = InstructionExec2;
+        current_data_bus_input = bus_sources::DataBusSrcDataIn;
+        ctrl_signals[control_signals::CtrlLoadInputB] = 1;
+      end
+      InstructionExec2: begin
+        current_data_bus_input = bus_sources::DataBusSrcRegAccumulator;
+        ctrl_signals[control_signals::CtrlLoadInputA] = 1;
+      end
+      InstructionExec3: begin
+        next_instr_state = InstructionFetch;
+        current_data_bus_input = bus_sources::DataBusSrcRegAluResult;
+        ctrl_signals[control_signals::CtrlUpdateFlagNegative] = 1;
+        ctrl_signals[control_signals::CtrlUpdateFlagZero] = 1;
+        ctrl_signals[control_signals::CtrlUpdateFlagCarry] = 1;
+        ctrl_signals[control_signals::CtrlUpdateFlagOverflow] = 1;
+      end
+    endcase
+  endtask
+
+  task exec_jmp();
+    case (current_instr_state)
+      InstructionExec1: begin
+        next_instr_state = InstructionFetch;
+        ctrl_signals[control_signals::CtrlIncEnablePc] = 0;
+        ctrl_signals[control_signals::CtrlLoadPc] = 1;
+      end
       default: invalid_state();
     endcase
   endtask
@@ -152,8 +305,45 @@ module control_unit (
         next_instr_state = InstructionFetch;
         current_data_bus_input = bus_sources::DataBusSrcDataIn;
         ctrl_signals[control_signals::CtrlLoadAccumutator] = 1;
+        ctrl_signals[control_signals::CtrlUpdateFlagNegative] = 1;
+        ctrl_signals[control_signals::CtrlUpdateFlagZero] = 1;
       end
       default: invalid_state();
+    endcase
+  endtask
+
+  task exec_ldx();
+    case (current_instr_state)
+      InstructionExec1: begin
+        next_instr_state = InstructionFetch;
+        current_data_bus_input = bus_sources::DataBusSrcDataIn;
+        ctrl_signals[control_signals::CtrlLoadX] = 1;
+        ctrl_signals[control_signals::CtrlUpdateFlagNegative] = 1;
+        ctrl_signals[control_signals::CtrlUpdateFlagZero] = 1;
+      end
+      default: invalid_state();
+    endcase
+  endtask
+
+  task exec_ldy();
+    case (current_instr_state)
+      InstructionExec1: begin
+        next_instr_state = InstructionFetch;
+        current_data_bus_input = bus_sources::DataBusSrcDataIn;
+        ctrl_signals[control_signals::CtrlLoadY] = 1;
+        ctrl_signals[control_signals::CtrlUpdateFlagNegative] = 1;
+        ctrl_signals[control_signals::CtrlUpdateFlagZero] = 1;
+      end
+      default: invalid_state();
+    endcase
+  endtask
+
+  task exec_sec();
+    case (current_instr_state)
+      InstructionExec1: begin
+        next_instr_state = InstructionFetch;
+        ctrl_signals[control_signals::CtrlSetFlagCarry] = 1;
+      end
     endcase
   endtask
 
@@ -168,33 +358,29 @@ module control_unit (
     endcase
   endtask
 
-  task exec_adc();
-    begin
-      case (current_instr_state)
-        InstructionExec1: begin
-          next_instr_state = InstructionExec2;
-          current_data_bus_input = bus_sources::DataBusSrcDataIn;
-          ctrl_signals[control_signals::CtrlLoadInputB] = 1;
-          alu_op = control_signals::ALU_ADD;
-
-        end
-        InstructionExec2: begin
-          next_instr_state = InstructionFetch;
-          current_data_bus_input = bus_sources::DataBusSrcRegAluResult;
-          ctrl_signals[control_signals::CtrlLoadAccumutator] = 1;
-          ctrl_signals[control_signals::CtrlLoadStatusReg] = 1;
-        end
-        default: invalid_state();
-      endcase
-    end
-  endtask
-
-  task exec_jmp();
+  task exec_stx();
     case (current_instr_state)
       InstructionExec1: begin
         next_instr_state = InstructionFetch;
-        ctrl_signals[control_signals::CtrlLoadPc] = 1;
+        current_data_bus_input = bus_sources::DataBusSrcRegX;
+        ctrl_signals[control_signals::CtrlRead0Write1] = 1;
       end
+      default: invalid_state();
     endcase
   endtask
+
+  task exec_sty();
+    case (current_instr_state)
+      InstructionExec1: begin
+        next_instr_state = InstructionFetch;
+        current_data_bus_input = bus_sources::DataBusSrcRegY;
+        ctrl_signals[control_signals::CtrlRead0Write1] = 1;
+      end
+      default: invalid_state();
+    endcase
+  endtask
+
+
+
+
 endmodule
