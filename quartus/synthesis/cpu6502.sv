@@ -7,29 +7,16 @@ module cpu6502 (
     output logic [15:0] address_out
 );
 
-
-  typedef enum logic [31:0] {
-    InstructionFetch,
-    InstructionDecode,
-    InstructionCycle2,
-    InstructionCycle3,
-    InstructionCycle4,
-    InstructionCycle5,
-    InstructionCycle6,
-
-    InstructionStateEndMarker
-  } instruction_state_t;
-
   // ---------------------------------------------------------
   // ------------------ CONTROL SIGNALS ----------------------
   // ---------------------------------------------------------
   logic ctrl_signals[control_signals::CtrlSignalEndMarker];
-  instruction_state_t current_instr_state, next_instr_state;
-  logic [7:0] current_instr;
 
   control_signals::alu_op_t alu_op;
 
   logic [7:0] data_in_latch;
+
+  assign READ_write = ctrl_signals[control_signals::CtrlRead0Write1];
 
   // ---------------------------------------------------------------
   // ------------------ Data and Address Buses ---------------------
@@ -53,6 +40,7 @@ module cpu6502 (
     address_low_bus_inputs[current_address_low_bus_input]
   };
   assign data_bus_inputs[bus_sources::DataBusSrcDataIn] = data_in;
+  assign data_bus_inputs[bus_sources::DataBusSrcDataInLatch] = data_in_latch;
   assign data_bus_inputs[bus_sources::DataBusSrcFF] = 8'hff;
 
   // ---------------------------------------------------------------
@@ -79,6 +67,21 @@ module cpu6502 (
       .data_out(data_bus_inputs[bus_sources::DataBusSrcRegY]),
       .clk(clk_in),
       .load(ctrl_signals[control_signals::CtrlLoadY]),
+      .reset(reset)
+  );
+
+  register AddressLowReg (
+      .data_in(data_bus),
+      .data_out(address_low_bus_inputs[bus_sources::AddressLowSrcAddrLowReg]),
+      .clk(clk_in),
+      .load(ctrl_signals[control_signals::CtrlLoadAddrLow]),
+      .reset(reset)
+  );
+  register AddressHighReg (
+      .data_in(data_bus),
+      .data_out(address_high_bus_inputs[bus_sources::AddressHighSrcAddrHighReg]),
+      .clk(clk_in),
+      .load(ctrl_signals[control_signals::CtrlLoadAddrHigh]),
       .reset(reset)
   );
 
@@ -123,6 +126,27 @@ module cpu6502 (
       .PCH_out(address_high_bus_inputs[bus_sources::AddressHighSrcPcHigh])
   );
 
+  // Status Register
+  logic status_flags[8];
+  logic flag_carry, flag_zero, flag_negative, flag_overflow;
+  assign status_flags[control_signals::StatusFlagCarry] = flag_carry;
+  assign status_flags[control_signals::StatusFlagOverflow] = flag_zero;
+  assign status_flags[control_signals::StatusFlagNegative] = flag_negative;
+  assign status_flags[control_signals::StatusFlagZero] = flag_overflow;
+  status_register status_register (
+      .load         (ctrl_signals[control_signals::CtrlLoadStatusReg]),
+      .clk          (clk_in),
+      .reset        (reset),
+      .carry_in     (alu_carry),
+      .zero_in      (alu_zero),
+      .negative_in  (alu_negative),
+      .overflow_in  (alu_overflow),
+      .flag_carry   (flag_carry),
+      .flag_zero    (flag_zero),
+      .flag_negative(flag_negative),
+      .flag_overflow(flag_overflow)
+  );
+
   // Instruction Register
   instruction_set::opcode_t instruction_register;
   register InstructionRegister (
@@ -134,21 +158,19 @@ module cpu6502 (
       .reset(reset)
   );
 
-  // Status Register
-  logic [7:0] status_flags;
-  status_register status_register (
-      .load         (ctrl_signals[control_signals::CtrlLoadInstReg]),
-      .clk          (clk),
-      .reset        (reset),
-      .carry_in     (alu_carry),
-      .zero_in      (alu_zero),
-      .negative_in  (alu_negative),
-      .overflow_in  (alu_overflow),
-      .flag_carry   (status_flags[StatusFlagCarry]),
-      .flag_zero    (status_flags[StatusFlagZero]),
-      .flag_negative(status_flags[StatusFlagNegative]),
-      .flag_overflow(status_flags[StatusFlagOverflow])
+  control_unit control_unit (
+      .status_flags                  (status_flags),
+      .data_in_latch                 (data_in_latch),
+      .current_opcode                (instruction_register),
+      .ctrl_signals                  (ctrl_signals),
+      .alu_op                        (alu_op),
+      .current_data_bus_input        (current_data_bus_input),
+      .current_address_low_bus_input (current_address_low_bus_input),
+      .current_address_high_bus_input(current_address_high_bus_input),
+      .clk                           (clk_in),
+      .reset                         (reset)
   );
+
 
   // --------------------------------------------------------
   // ------------------ CONTROL LOGIC -----------------------
@@ -156,83 +178,5 @@ module cpu6502 (
 
   always_ff @(posedge clk_in) begin
     data_in_latch <= data_in;
-    if (reset) begin
-      current_instr_state <= InstructionFetch;
-    end else begin
-      current_instr_state <= next_instr_state;
-    end
   end
-
-  always_comb begin
-    ctrl_signals[control_signals::CtrlLoadAccumutator] = 0;
-    ctrl_signals[control_signals::CtrlLoadX] = 0;
-    ctrl_signals[control_signals::CtrlLoadY] = 0;
-    ctrl_signals[control_signals::CtrlLoadInputA] = 0;
-    ctrl_signals[control_signals::CtrlLoadInputB] = 0;
-    ctrl_signals[control_signals::CtrlPcLoad] = 0;
-    ctrl_signals[control_signals::CtrlLoadInstReg] = 0;
-    ctrl_signals[control_signals::CtrlIncEnablePc] = 0;
-
-    alu_op = control_signals::ALU_ADD;
-
-    READ_write = 1;
-
-    next_instr_state = current_instr_state;
-    current_data_bus_input = bus_sources::DataBusSrcDataIn;
-    current_address_low_bus_input = bus_sources::AddressLowSrcPcLow;
-    current_address_high_bus_input = bus_sources::AddressHighSrcPcHigh;
-
-    case (current_instr_state)
-      InstructionFetch: begin
-        next_instr_state = InstructionDecode;
-        ctrl_signals[control_signals::CtrlLoadInstReg] = 1;
-        ctrl_signals[control_signals::CtrlIncEnablePc] = 1;
-      end
-      InstructionDecode: begin
-        ctrl_signals[control_signals::CtrlIncEnablePc] = 1;
-        case (instruction_register)
-          instruction_set::OpcNOP: begin
-            next_instr_state = InstructionFetch;
-          end
-          instruction_set::OpcLDA_imm: begin
-            next_instr_state = InstructionFetch;
-            ctrl_signals[control_signals::CtrlLoadAccumutator] = 1;
-          end
-          instruction_set::OpcLDA_abs: begin
-            next_instr_state = InstructionCycle2;
-            ctrl_signals[control_signals::CtrlLoadAccumutator] = 1;
-          end
-          instruction_set::OpcADC_imm: begin
-            next_instr_state = InstructionCycle2;
-            ctrl_signals[control_signals::CtrlLoadInputA] = 1;
-          end
-        endcase
-      end
-      InstructionCycle2: begin
-        case (instruction_register)
-          instruction_set::OpcADC_imm: begin
-            next_instr_state = InstructionCycle3;
-            current_data_bus_input = bus_sources::DataBusSrcRegAccumulator;
-            ctrl_signals[control_signals::CtrlLoadInputB] = 1;
-          end
-        endcase
-      end
-      InstructionCycle3: begin
-        case (instruction_register)
-          instruction_set::OpcADC_imm: begin
-            next_instr_state = InstructionCycle4;
-            current_data_bus_input = bus_sources::DataBusSrcRegAccumulator;
-            ctrl_signals[control_signals::CtrlLoadInputB] = 1;
-          end
-        endcase
-      end
-      InstructionCycle4: begin
-        next_instr_state = InstructionFetch;
-        current_data_bus_input = bus_sources::DataBusSrcRegAluResult;
-        ctrl_signals[control_signals::CtrlLoadAccumutator] = 1;
-      end
-    endcase
-  end
-
-
 endmodule

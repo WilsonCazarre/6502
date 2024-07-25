@@ -5,33 +5,34 @@ module cpu6502_test ();
 
   logic reset;
   logic READ_write;
-  logic [7:0] data_in, data_out;
+  logic [7:0] data_in_cpu, data_out_cpu;
   logic [15:0] address_out;
 
   cpu6502 cpu6502 (
       .reset      (reset),
       .clk_in     (clk),
       .READ_write (READ_write),
-      .data_in    (data_in),
-      .data_out   (data_out),
+      .data_in    (data_in_cpu),
+      .data_out   (data_out_cpu),
       .address_out(address_out)
   );
 
+  memory ram (
+      .address (address_out),
+      .data_in (data_out_cpu),
+      .data_out(data_in_cpu),
+      .wrt_en  (READ_write),
+      .clk     (clk),
+      .reset   (reset)
+  );
+
+
   initial begin
-    reset   = 1;
-    data_in = instruction_set::OpcNOP;
+    reset = 1;
+
     repeat (1) @(posedge clk);
     reset = 0;
-    repeat (1) @(posedge clk);
-    data_in = instruction_set::OpcLDA_imm;
-    repeat (2) @(posedge clk);
-    data_in = 8'h20;
-    repeat (1) @(posedge clk);
-    data_in = instruction_set::OpcADC_imm;
-    repeat (1) @(posedge clk);
-    data_in = 8'h5;
-    repeat (10) @(posedge clk);
-
+    repeat (30) @(posedge clk);
     $stop;
   end
 

@@ -19,6 +19,9 @@ package control_signals;
     CtrlIncEnablePc = 6,
     CtrlLoadPc = 7,
     CtrlLoadStatusReg = 8,
+    CtrlRead0Write1 = 9,
+    CtrlLoadAddrLow = 10,
+    CtrlLoadAddrHigh = 11,
 
     CtrlSignalEndMarker
   } ctrl_signals_t;

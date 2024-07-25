@@ -8,10 +8,10 @@ module status_register (
     input wire negative_in,
     input wire overflow_in,
 
-    output reg flag_carry,
-    output reg flag_zero,
-    output reg flag_negative,
-    output reg flag_overflow
+    output logic flag_carry,
+    output logic flag_zero,
+    output logic flag_negative,
+    output logic flag_overflow
 );
 
 
