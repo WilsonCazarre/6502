@@ -22,6 +22,8 @@ package bus_sources;
 
     AddressLowSrcAddrLowReg,
 
+    AddressLowSrcStackPointer,
+
     AddressLowSrcEndMarker
   } address_low_bus_source_t;
 
@@ -32,6 +34,8 @@ package bus_sources;
     AddressHighSrcDataInLatch,
 
     AddressHighSrcAddrHighReg,
+
+    AddressHighSrcStackPointer,
 
     AddressHighSrcEndMarker
   } address_high_bus_source_t;

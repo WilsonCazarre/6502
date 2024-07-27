@@ -30,6 +30,12 @@ package control_signals;
     CtrlSetFlagOverflow = 17,
     CtrlClearFlagCarry = 18,
     CtrlClearFlagOverflow = 19,
+    CtrlIncAddressHighReg = 20,
+    CtrlAluCarryIn = 21,
+    CtrlResetInputA = 22,
+    CtrlLoadStackPointer = 23,
+    CtrlIncStackPointer = 24,
+    CtrlDecStackPointer = 25,
 
     CtrlSignalEndMarker
   } ctrl_signals_t;

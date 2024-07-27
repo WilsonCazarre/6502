@@ -32,7 +32,7 @@ module cpu6502_test ();
 
     repeat (1) @(posedge clk);
     reset = 0;
-    repeat (30) @(posedge clk);
+    repeat (20) @(posedge clk);
     $stop;
   end
 

@@ -7,7 +7,7 @@ module memory (
     input clk,
     input reset
 );
-  logic [7:0] ram[2**8];
+  logic [7:0] ram[2**10];
 
   initial begin
     $readmemh("mem.hex", ram);
