@@ -373,5 +373,6 @@ TSWLatexianTemp*
 #*Notes.bib
 
 quartus/.qsys_edit/*
+quartus/output_files/*
 *.sld
 quartus/wave.txt
