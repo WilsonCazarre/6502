@@ -313,9 +313,9 @@ module control_unit (
       instruction_set::OpcPLA_impl: exec_pla(control_signals::CtrlLoadX);
       instruction_set::OpcPLA_impl: exec_pla(control_signals::CtrlLoadY);
 
-      instruction_set::OpcSBC_imm:  exec_arithmetic_op(control_signals::ALU_SUB);
-      instruction_set::OpcSBC_abs:  exec_arithmetic_op(control_signals::ALU_SUB);
-      instruction_set::OpcSBC_absx: exec_arithmetic_op(control_signals::ALU_SUB);
+      instruction_set::OpcSBC_imm:  exec_arithmetic_op(control_signals::ALU_ADD, 1);
+      instruction_set::OpcSBC_abs:  exec_arithmetic_op(control_signals::ALU_ADD, 1);
+      instruction_set::OpcSBC_absx: exec_arithmetic_op(control_signals::ALU_ADD, 1);
 
       instruction_set::OpcSEC_impl: exec_sec();
 
@@ -330,7 +330,7 @@ module control_unit (
     endcase
   endtask
 
-  task exec_arithmetic_op(control_signals::alu_op_t alu_op_arg);
+  task exec_arithmetic_op(control_signals::alu_op_t alu_op_arg, logic invert_b = 0);
     alu_op = alu_op_arg;
     case (current_instr_state)
       InstructionExec1: begin
@@ -345,6 +345,9 @@ module control_unit (
       end
       InstructionExec3: begin
         next_instr_state = InstructionFetch;
+        if (invert_b) begin
+          ctrl_signals[control_signals::CtrlAluInvertB] = 1;
+        end
         current_data_bus_input = bus_sources::DataBusSrcRegAluResult;
         ctrl_signals[control_signals::CtrlLoadAccumutator] = 1;
         ctrl_signals[control_signals::CtrlUpdateFlagNegative] = 1;

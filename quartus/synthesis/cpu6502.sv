@@ -130,6 +130,7 @@ module cpu6502 (
       .carry_in(flag_carry | ctrl_signals[control_signals::CtrlAluCarryIn]),
       .input_a(alu_input_a),
       .input_b(alu_input_b),
+      .invert_b(ctrl_signals[control_signals::CtrlAluInvertB]),
       .operation(alu_op),
       .alu_out(data_bus_inputs[bus_sources::DataBusSrcRegAluResult]),
       .overflow_out(alu_overflow),

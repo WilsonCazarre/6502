@@ -6,6 +6,7 @@ module alu (
     input wire                            carry_in,
     input wire                      [7:0] input_a,
     input wire                      [7:0] input_b,
+    input wire                            invert_b,
     input control_signals::alu_op_t       operation,
 
     output wire [7:0] alu_out,
@@ -15,7 +16,9 @@ module alu (
     output wire       carry_out
 );
 
-  reg [8:0] result;
+  logic [8:0] result;
+  logic [7:0] effective_b;
+  assign effective_b = invert_b ? ~input_b : input_b;
 
   assign alu_out = result[7:0];
 
@@ -28,10 +31,7 @@ module alu (
   always_comb begin
     case (operation)
       control_signals::ALU_ADD: begin
-        result = input_a + input_b + carry_in;
-      end
-      control_signals::ALU_SUB: begin
-        result = input_a - input_b - carry_in;
+        result = input_a + effective_b + carry_in;
       end
       control_signals::ALU_AND: begin
         result = input_a & input_b;

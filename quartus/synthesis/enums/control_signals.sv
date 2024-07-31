@@ -36,6 +36,7 @@ package control_signals;
     CtrlLoadStackPointer = 23,
     CtrlIncStackPointer = 24,
     CtrlDecStackPointer = 25,
+    CtrlAluInvertB = 26,
 
     CtrlSignalEndMarker
   } ctrl_signals_t;

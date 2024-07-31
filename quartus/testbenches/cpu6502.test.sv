@@ -17,13 +17,15 @@ module cpu6502_test ();
       .address_out(address_out)
   );
 
-  memory ram (
-      .address (address_out),
-      .data_in (data_out_cpu),
-      .data_out(data_in_cpu),
-      .wrt_en  (READ_write),
-      .clk     (clk),
-      .reset   (reset)
+  memory #(
+      .init_file("mem.hex")
+  ) ram (
+      .address    (address_out),
+      .data_in    (data_out_cpu),
+      .data_out   (data_in_cpu),
+      .wrt_en     (READ_write),
+      .clk        (clk),
+      .chip_select(1'b1)
   );
 
 
