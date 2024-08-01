@@ -31,12 +31,13 @@ package control_signals;
     CtrlClearFlagCarry = 18,
     CtrlClearFlagOverflow = 19,
     CtrlIncAddressHighReg = 20,
-    CtrlAluCarryIn = 21,
-    CtrlResetInputA = 22,
-    CtrlLoadStackPointer = 23,
-    CtrlIncStackPointer = 24,
-    CtrlDecStackPointer = 25,
-    CtrlAluInvertB = 26,
+    CtrlDecAddressHighReg = 21,
+    CtrlAluCarryIn = 22,
+    CtrlResetInputA = 23,
+    CtrlLoadStackPointer = 24,
+    CtrlIncStackPointer = 25,
+    CtrlDecStackPointer = 26,
+    CtrlAluInvertB = 27,
 
     CtrlSignalEndMarker
   } ctrl_signals_t;

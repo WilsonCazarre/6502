@@ -46,6 +46,9 @@ module cpu6502 (
   };
   assign address_high_bus_inputs[bus_sources::AddressHighSrcStackPointer] = 8'h01;
 
+  assign data_bus_inputs[bus_sources::DataBusSrcAddrLowBus] = address_low_bus;
+  assign data_bus_inputs[bus_sources::DataBusSrcAddrHighBus] = address_high_bus;
+
   // ---------------------------------------------------------------
   // ------------------ Datapath Components ------------------------
   // ---------------------------------------------------------------
@@ -127,7 +130,7 @@ module cpu6502 (
   logic flag_carry, flag_zero, flag_negative, flag_overflow;
 
   alu alu (
-      .carry_in(flag_carry | ctrl_signals[control_signals::CtrlAluCarryIn]),
+      .carry_in(ctrl_signals[control_signals::CtrlAluCarryIn]),
       .input_a(alu_input_a),
       .input_b(alu_input_b),
       .invert_b(ctrl_signals[control_signals::CtrlAluInvertB]),
@@ -196,6 +199,7 @@ module cpu6502 (
 
   control_unit control_unit (
       .status_flags                  (status_flags),
+      .alu_carry                     (alu_carry),
       .data_in_latch                 (data_in_latch),
       .current_opcode                (instruction_register),
       .ctrl_signals                  (ctrl_signals),

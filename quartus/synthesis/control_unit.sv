@@ -4,6 +4,7 @@ module control_unit (
     input instruction_set::opcode_t current_opcode,
     input clk,
     input reset,
+    input alu_carry,
 
     output logic ctrl_signals[control_signals::CtrlSignalEndMarker],
     output control_signals::alu_op_t alu_op,
@@ -21,19 +22,23 @@ module control_unit (
     InstructionExec1,
     InstructionExec2,
     InstructionExec3,
+    InstructionExec4,
+    InstructionExec5,
     InstructionInvalid,
     InstructionStateEndMarker
   } instruction_state_t;
 
   instruction_state_t current_instr_state, next_instr_state;
   instruction_set::address_mode_t current_addr_mode, next_addr_mode;
+  logic negative_data_in;
 
   always_ff @(posedge clk) begin
     if (reset) begin
       current_instr_state <= InstructionFetch;
     end else begin
+      negative_data_in <= data_in_latch[7];
       current_instr_state <= next_instr_state;
-      current_addr_mode   <= next_addr_mode;
+      current_addr_mode <= next_addr_mode;
     end
   end
 
@@ -64,14 +69,14 @@ module control_unit (
           instruction_set::OpcAND_abs:  abs_addr_mode();
           instruction_set::OpcAND_absx: absx_addr_mode();
 
-          instruction_set::OpcBCC_abs: abs_addr_mode();
-          instruction_set::OpcBCS_abs: abs_addr_mode();
-          instruction_set::OpcBEQ_abs: abs_addr_mode();
-          instruction_set::OpcBMI_abs: abs_addr_mode();
-          instruction_set::OpcBNE_abs: abs_addr_mode();
-          instruction_set::OpcBPL_abs: abs_addr_mode();
-          instruction_set::OpcBVC_abs: abs_addr_mode();
-          instruction_set::OpcBVS_abs: abs_addr_mode();
+          instruction_set::OpcBCC_abs: imm_addr_mode();
+          instruction_set::OpcBCS_abs: imm_addr_mode();
+          instruction_set::OpcBEQ_abs: imm_addr_mode();
+          instruction_set::OpcBMI_abs: imm_addr_mode();
+          instruction_set::OpcBNE_abs: imm_addr_mode();
+          instruction_set::OpcBPL_abs: imm_addr_mode();
+          instruction_set::OpcBVC_abs: imm_addr_mode();
+          instruction_set::OpcBVS_abs: imm_addr_mode();
 
           instruction_set::OpcCLC_impl: impl_addr_mode();
 
@@ -247,7 +252,6 @@ module control_unit (
     next_addr_mode   = instruction_set::AddrModeImpl;
   endtask
 
-
   // --------------------------------------------------------
   // ---------- Opcode execution system tasks ---------------
   // --------------------------------------------------------
@@ -345,6 +349,7 @@ module control_unit (
       end
       InstructionExec3: begin
         next_instr_state = InstructionFetch;
+        ctrl_signals[control_signals::CtrlAluCarryIn] = status_flags[control_signals::StatusFlagCarry];
         if (invert_b) begin
           ctrl_signals[control_signals::CtrlAluInvertB] = 1;
         end
@@ -384,10 +389,45 @@ module control_unit (
   endtask
 
   task exec_branch();
+    ctrl_signals[control_signals::CtrlIncEnablePc] = 0;
     case (current_instr_state)
       InstructionExec1: begin
-        next_instr_state = InstructionFetch;
+        next_instr_state = InstructionExec2;
         ctrl_signals[control_signals::CtrlIncEnablePc] = 0;
+        current_data_bus_input = bus_sources::DataBusSrcDataIn;
+        ctrl_signals[control_signals::CtrlLoadInputA] = 1;
+      end
+      InstructionExec2: begin
+        next_instr_state = InstructionExec3;
+        current_address_low_bus_input = bus_sources::AddressLowSrcPcLow;
+        current_data_bus_input = bus_sources::DataBusSrcAddrLowBus;
+        ctrl_signals[control_signals::CtrlLoadInputB] = 1;
+      end
+      InstructionExec3: begin
+        next_instr_state = InstructionExec4;
+        current_data_bus_input = bus_sources::DataBusSrcRegAluResult;
+        ctrl_signals[control_signals::CtrlAluCarryIn] = 0;
+        ctrl_signals[control_signals::CtrlLoadAddrLow] = 1;
+      end
+      InstructionExec4: begin
+        if (negative_data_in == 0 && !alu_carry || negative_data_in == 1 && alu_carry) begin
+          next_instr_state = InstructionFetch;
+          ctrl_signals[control_signals::CtrlIncEnablePc] = 1;
+          current_address_high_bus_input = bus_sources::AddressHighSrcPcHigh;
+          current_address_low_bus_input = bus_sources::AddressLowSrcAddrLowReg;
+          ctrl_signals[control_signals::CtrlLoadPc] = status_flags[current_opcode[7:6]] ~^ current_opcode[5];
+        end else if (negative_data_in) begin
+          next_instr_state = InstructionExec5;
+          ctrl_signals[control_signals::CtrlIncAddressHighReg] = 1;
+        end else begin
+          next_instr_state = InstructionExec5;
+          ctrl_signals[control_signals::CtrlIncAddressHighReg] = 1;
+        end
+      end
+      InstructionExec5: begin
+        next_instr_state = InstructionFetch;
+        current_address_high_bus_input = bus_sources::AddressHighSrcPcHigh;
+        current_address_low_bus_input = bus_sources::AddressLowSrcAddrLowReg;
         ctrl_signals[control_signals::CtrlLoadPc] = status_flags[current_opcode[7:6]] ~^ current_opcode[5];
       end
       default: invalid_state();

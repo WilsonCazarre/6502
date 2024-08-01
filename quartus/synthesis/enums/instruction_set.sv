@@ -82,7 +82,8 @@ package instruction_set;
     AddrModeAbs,
     AddrModeAbsX,
     AddrModeStack,
-    AddrModeImpl
+    AddrModeImpl,
+    AddrModeRel
   } address_mode_t;
 
 endpackage

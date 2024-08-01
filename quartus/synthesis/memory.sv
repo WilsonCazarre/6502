@@ -10,12 +10,12 @@ module memory #(
     input wrt_en,
     input clk
 );
-  (* ram_init_file = init_file *) logic [7:0] ram[2**depth];
+  // (* ram_init_file = init_file *) logic [7:0] ram[2**depth];
 
-  // logic [7:0] ram[2**depth];
-  // initial begin
-  //   $readmemh(init_file, ram);
-  // end
+  logic [7:0] ram[2**depth];
+  initial begin
+    $readmemh(init_file, ram);
+  end
 
   assign data_out = ram[address];
 
