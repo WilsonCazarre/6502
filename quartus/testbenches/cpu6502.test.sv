@@ -18,7 +18,8 @@ module cpu6502_test ();
   );
 
   memory #(
-      .init_file("mem.hex")
+      .init_file("mem.hex"),
+      .depth(9)
   ) ram (
       .address    (address_out),
       .data_in    (data_out_cpu),
@@ -34,7 +35,7 @@ module cpu6502_test ();
 
     repeat (1) @(posedge clk);
     reset = 0;
-    repeat (20) @(posedge clk);
+    repeat (10000) @(posedge clk);
     $stop;
   end
 

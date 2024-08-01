@@ -389,43 +389,48 @@ module control_unit (
   endtask
 
   task exec_branch();
-    ctrl_signals[control_signals::CtrlIncEnablePc] = 0;
     case (current_instr_state)
       InstructionExec1: begin
         next_instr_state = InstructionExec2;
         ctrl_signals[control_signals::CtrlIncEnablePc] = 0;
         current_data_bus_input = bus_sources::DataBusSrcDataIn;
         ctrl_signals[control_signals::CtrlLoadInputA] = 1;
+        ctrl_signals[control_signals::CtrlIncEnablePc] = 1;
       end
       InstructionExec2: begin
         next_instr_state = InstructionExec3;
         current_address_low_bus_input = bus_sources::AddressLowSrcPcLow;
         current_data_bus_input = bus_sources::DataBusSrcAddrLowBus;
         ctrl_signals[control_signals::CtrlLoadInputB] = 1;
+        ctrl_signals[control_signals::CtrlIncEnablePc] = 0;
       end
       InstructionExec3: begin
         next_instr_state = InstructionExec4;
         current_data_bus_input = bus_sources::DataBusSrcRegAluResult;
         ctrl_signals[control_signals::CtrlAluCarryIn] = 0;
         ctrl_signals[control_signals::CtrlLoadAddrLow] = 1;
+        ctrl_signals[control_signals::CtrlIncEnablePc] = 0;
       end
       InstructionExec4: begin
         if (negative_data_in == 0 && !alu_carry || negative_data_in == 1 && alu_carry) begin
           next_instr_state = InstructionFetch;
-          ctrl_signals[control_signals::CtrlIncEnablePc] = 1;
+          ctrl_signals[control_signals::CtrlIncEnablePc] = 0;
           current_address_high_bus_input = bus_sources::AddressHighSrcPcHigh;
           current_address_low_bus_input = bus_sources::AddressLowSrcAddrLowReg;
           ctrl_signals[control_signals::CtrlLoadPc] = status_flags[current_opcode[7:6]] ~^ current_opcode[5];
         end else if (negative_data_in) begin
           next_instr_state = InstructionExec5;
           ctrl_signals[control_signals::CtrlIncAddressHighReg] = 1;
+          ctrl_signals[control_signals::CtrlIncEnablePc] = 0;
         end else begin
           next_instr_state = InstructionExec5;
-          ctrl_signals[control_signals::CtrlIncAddressHighReg] = 1;
+          ctrl_signals[control_signals::CtrlDecAddressHighReg] = 1;
+          ctrl_signals[control_signals::CtrlIncEnablePc] = 0;
         end
       end
       InstructionExec5: begin
         next_instr_state = InstructionFetch;
+        ctrl_signals[control_signals::CtrlIncEnablePc] = 0;
         current_address_high_bus_input = bus_sources::AddressHighSrcPcHigh;
         current_address_low_bus_input = bus_sources::AddressLowSrcAddrLowReg;
         ctrl_signals[control_signals::CtrlLoadPc] = status_flags[current_opcode[7:6]] ~^ current_opcode[5];

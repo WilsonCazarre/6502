@@ -60,7 +60,8 @@ module cpu6502 (
       .clk(clk_in),
       .load(ctrl_signals[control_signals::CtrlLoadAccumutator]),
       .reset(reset),
-      .inc(1'b0)
+      .inc(1'b0),
+      .dec(1'b0)
   );
   register RegX (
       .data_in(data_bus),
@@ -68,7 +69,8 @@ module cpu6502 (
       .clk(clk_in),
       .load(ctrl_signals[control_signals::CtrlLoadX]),
       .reset(reset),
-      .inc(1'b0)
+      .inc(1'b0),
+      .dec(1'b0)
   );
   register RegY (
       .data_in(data_bus),
@@ -76,7 +78,8 @@ module cpu6502 (
       .clk(clk_in),
       .load(ctrl_signals[control_signals::CtrlLoadY]),
       .reset(reset),
-      .inc(1'b0)
+      .inc(1'b0),
+      .dec(1'b0)
   );
 
   register AddressLowReg (
@@ -85,7 +88,8 @@ module cpu6502 (
       .clk(clk_in),
       .load(ctrl_signals[control_signals::CtrlLoadAddrLow]),
       .reset(reset),
-      .inc(1'b0)
+      .inc(1'b0),
+      .dec(1'b0)
   );
   register AddressHighReg (
       .data_in(data_bus),
@@ -93,6 +97,7 @@ module cpu6502 (
       .clk(clk_in),
       .load(ctrl_signals[control_signals::CtrlLoadAddrHigh]),
       .inc(ctrl_signals[control_signals::CtrlIncAddressHighReg]),
+      .dec(ctrl_signals[control_signals::CtrlDecAddressHighReg]),
       .reset(reset)
   );
 
@@ -115,7 +120,8 @@ module cpu6502 (
       .clk(clk_in),
       .load(ctrl_signals[control_signals::CtrlLoadInputA]),
       .reset(reset | ctrl_signals[control_signals::CtrlResetInputA]),
-      .inc(1'b0)
+      .inc(1'b0),
+      .dec(1'b0)
   );
   register InputB (
       .data_in(data_bus),
@@ -123,7 +129,8 @@ module cpu6502 (
       .clk(clk_in),
       .load(ctrl_signals[control_signals::CtrlLoadInputB]),
       .reset(reset),
-      .inc(1'b0)
+      .inc(1'b0),
+      .dec(1'b0)
   );
 
   logic status_flags[8];
@@ -194,7 +201,8 @@ module cpu6502 (
       .clk(clk_in),
       .load(ctrl_signals[control_signals::CtrlLoadInstReg]),
       .reset(reset),
-      .inc(1'b0)
+      .inc(1'b0),
+      .dec(1'b0)
   );
 
   control_unit control_unit (

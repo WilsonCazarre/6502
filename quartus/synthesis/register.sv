@@ -5,7 +5,8 @@ module register (
     input logic clk,
     input logic load,
     input logic reset,
-    input logic inc
+    input logic inc,
+    input logic dec
 );
   reg [7:0] current_value;
 
@@ -16,6 +17,8 @@ module register (
       current_value <= data_in;
     end else if (inc) begin
       current_value <= current_value + 1;
+    end else if (dec) begin
+      current_value <= current_value - 1;
     end else begin
       current_value <= current_value;
     end
