@@ -5,9 +5,9 @@ module dev (
     // input CLOCK2_50,
     // input CLOCK3_50,
     // //////////// SEG7 //////////
-    // output [ 0:6] HEX0,
-    // output [ 0:6] HEX1,
-    // output [ 0:6] HEX2,
+    output [ 0:6] HEX0,
+    output [ 0:6] HEX1,
+    output [ 0:6] HEX2,
     // output [ 6:0] HEX3,
     output [ 0:6] HEX4,
     output [ 0:6] HEX5,
@@ -55,6 +55,14 @@ module dev (
       .hex_ones    (HEX4),
       .hex_sixteens(HEX5),
   );
+
+  bcd_display bcd_display (
+      .value       (port_a),
+      .hex_ones    (HEX2),
+      .hex_tens    (HEX1),
+      .hex_hundreds(HEX0)
+  );
+
 
 
   clock clock (
@@ -119,7 +127,7 @@ module dev (
   assign LCD_RW = port_a[6];
   assign LCD_RS = port_a[5];
   assign LCD_ON = 1'b1;
-  assign LCD_BLON = 1'b0;
+  assign LCD_BLON = SW[2];
   assign LCD_DATA = port_b;
 
 
