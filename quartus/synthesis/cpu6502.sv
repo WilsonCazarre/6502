@@ -33,21 +33,26 @@ module cpu6502 (
 
   assign data_bus = data_bus_inputs[current_data_bus_input];
   assign data_out = data_bus;
+
   assign data_bus_inputs[bus_sources::DataBusSrcDataIn] = data_in;
   assign data_bus_inputs[bus_sources::DataBusSrcDataInLatch] = data_in_latch;
   assign data_bus_inputs[bus_sources::DataBusSrcFF] = 8'hff;
   assign data_bus_inputs[bus_sources::DataBusSrcZero] = 8'h00;
-  assign address_low_bus = address_low_bus_inputs[current_address_low_bus_input];
 
+  assign address_low_bus = address_low_bus_inputs[current_address_low_bus_input];
   assign address_high_bus = address_high_bus_inputs[current_address_high_bus_input];
   assign address_out = {
     address_high_bus_inputs[current_address_high_bus_input],
     address_low_bus_inputs[current_address_low_bus_input]
   };
   assign address_high_bus_inputs[bus_sources::AddressHighSrcStackPointer] = 8'h01;
+  assign address_low_bus_inputs[bus_sources::AddressLowSrcZero] = 8'h00;
 
   assign data_bus_inputs[bus_sources::DataBusSrcAddrLowBus] = address_low_bus;
   assign data_bus_inputs[bus_sources::DataBusSrcAddrHighBus] = address_high_bus;
+
+  assign address_low_bus_inputs[bus_sources::AddressLowSrcDataBus] = data_bus;
+  assign address_high_bus_inputs[bus_sources::AddressHighSrcDataBus] = data_bus;
 
   // ---------------------------------------------------------------
   // ------------------ Datapath Components ------------------------

@@ -45,134 +45,134 @@ RS=%00100000
   lda #0         ; Clear E/RW/RS
   sta PORTA
 
-  lda #"H"       ; Display on; Cursor on; Cursor blink
+  lda #"H"       
   sta PORTB
 
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
   lda #(EN|RS)
   sta PORTA
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
 
-  lda #"e"       ; Display on; Cursor on; Cursor blink
+  lda #"e"       
   sta PORTB
 
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
   lda #(EN|RS)
   sta PORTA
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
 
-  lda #"l"       ; Display on; Cursor on; Cursor blink
+  lda #"l"       
   sta PORTB
 
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
   lda #(EN|RS)
   sta PORTA
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
 
-  lda #"l"       ; Display on; Cursor on; Cursor blink
+  lda #"l"       
   sta PORTB
 
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
   lda #(EN|RS)
   sta PORTA
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
 
-  lda #"o"       ; Display on; Cursor on; Cursor blink
+  lda #"o"       
   sta PORTB
 
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
   lda #(EN|RS)
   sta PORTA
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
 
-  lda #","       ; Display on; Cursor on; Cursor blink
+  lda #","       
   sta PORTB
 
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
   lda #(EN|RS)
   sta PORTA
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
 
-  lda #" "       ; Display on; Cursor on; Cursor blink
+  lda #" "       
   sta PORTB
 
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
   lda #(EN|RS)
   sta PORTA
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
 
-  lda #"w"       ; Display on; Cursor on; Cursor blink
+  lda #"w"       
   sta PORTB
 
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
   lda #(EN|RS)
   sta PORTA
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
 
-  lda #"o"       ; Display on; Cursor on; Cursor blink
+  lda #"o"       
   sta PORTB
 
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
   lda #(EN|RS)
   sta PORTA
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
 
-  lda #"r"       ; Display on; Cursor on; Cursor blink
+  lda #"r"       
   sta PORTB
 
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
   lda #(EN|RS)
   sta PORTA
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
 
-  lda #"l"       ; Display on; Cursor on; Cursor blink
+  lda #"l"       
   sta PORTB
 
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
   lda #(EN|RS)
   sta PORTA
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
 
-  lda #"d"       ; Display on; Cursor on; Cursor blink
+  lda #"d"       
   sta PORTB
 
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
   lda #(EN|RS)
   sta PORTA
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
 
-  lda #"!"       ; Display on; Cursor on; Cursor blink
+  lda #"!"       
   sta PORTB
 
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
   lda #(EN|RS)
   sta PORTA
-  lda #RS        ; Clear E/RW/RS
+  lda #RS        
   sta PORTA
 loop:
   nop
