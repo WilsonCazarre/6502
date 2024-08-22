@@ -1,0 +1,110 @@
+{
+  "signal": [
+    { "name": "clk", "wave": "ppppppppp" },
+    {
+      "name": "data_in_cpu",
+      "wave": "77.777977",
+      "data": [
+        "a9",
+        "1",
+        "8d",
+        "ff",
+        "1",
+        "X",
+        "8d",
+        "fe",
+        "1",
+        "X",
+        "8d",
+        "ff",
+        "X",
+        "ad",
+        "ff",
+        "1",
+        "1",
+        "18",
+        "X"
+      ]
+    },
+    {
+      "name": "data_out_cpu",
+      "wave": "77.777777",
+      "data": [
+        "a9",
+        "1",
+        "8d",
+        "ff",
+        "1",
+        "1",
+        "8d",
+        "fe",
+        "1",
+        "1",
+        "8d",
+        "ff",
+        "1",
+        "ad",
+        "ff",
+        "1",
+        "1",
+        "18",
+        "X"
+      ]
+    },
+    {
+      "name": "address_out",
+      "wave": "77.777777",
+      "data": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "1ff",
+        "5",
+        "6",
+        "7",
+        "1fe",
+        "8",
+        "9",
+        "a",
+        "ffff",
+        "b",
+        "c",
+        "d",
+        "1ff",
+        "e",
+        "X"
+      ]
+    },
+    {
+      "name": "current_state",
+      "wave": "777777777",
+      "data": [
+        "Fetch",
+        "Decode",
+        "Exec1",
+        "Fetch",
+        "Decode",
+        "Mem1",
+        "Exec1",
+        "Fetch",
+        "Decode"
+      ]
+    },
+    {
+      "name": "instruction_register",
+      "wave": "97..7...7",
+      "data": ["X", "LDA_imm", "STA_abs", "STA_abs"]
+    },
+    {
+      "name": "address_mode",
+      "wave": "977.77..7",
+      "data": ["X", "Impl", "Imm", "Impl", "Abs", "Impl"]
+    },
+    { "name": "READ_write", "wave": "0.....10." }
+  ],
+  "config": {
+    "hscale": 3
+  }
+}

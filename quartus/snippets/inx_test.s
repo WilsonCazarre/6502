@@ -1,12 +1,14 @@
-PORTA=$ffff
-PORTB=$fffe
+DDRA=$0803
+DDRB=$0802
+PORTA=$0801
+PORTB=$0800
 
-  lda #0
-  sta PORTA
-  ldx #0
+reset:
+  ldx #$00
 loop:
-  stx PORTB
+  stx $00
+  lda $00
   inx
-  adc #0
-  sta PORTA
-  jmp loop
+  bne loop
+
+  jmp reset

@@ -376,3 +376,5 @@ quartus/.qsys_edit/*
 quartus/output_files/*
 *.sld
 quartus/wave.txt
+
+quartus/greybox_tmp/*

@@ -47,6 +47,7 @@ module cpu6502 (
   };
   assign address_high_bus_inputs[bus_sources::AddressHighSrcStackPointer] = 8'h01;
   assign address_low_bus_inputs[bus_sources::AddressLowSrcZero] = 8'h00;
+  assign address_high_bus_inputs[bus_sources::AddressHighSrcZero] = 8'h00;
 
   assign data_bus_inputs[bus_sources::DataBusSrcAddrLowBus] = address_low_bus;
   assign data_bus_inputs[bus_sources::DataBusSrcAddrHighBus] = address_high_bus;

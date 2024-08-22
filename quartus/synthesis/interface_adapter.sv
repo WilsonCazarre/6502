@@ -18,11 +18,11 @@ module interface_adapter (
     output logic [7:0] data_out,
 
     input logic [3:0] register_select,
-    input logic chip_en1,
+    input logic chip_en,
 
     input logic clk,
-    input logic reset,
-    input logic readb_write
+    input logic reset
+    // input logic readb_write
 );
 
 
@@ -48,7 +48,7 @@ module interface_adapter (
       port_a <= 8'h0;
       port_b <= 8'h0;
     end else
-    if (!chip_en1) begin
+    if (!chip_en) begin
 
     end else begin
       case (register_select)

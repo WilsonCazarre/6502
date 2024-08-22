@@ -65,59 +65,64 @@ module dev (
 
 
 
-  clock clock (
-      .clk_in (CLOCK_50),
-      .clk_out(clk),
-  );
-
   cpu6502 cpu6502 (
       .reset      (reset),
       .clk_in     (clk),
-      .READ_write (read_write),
-      .data_in    (cpu_data_in),
-      .data_out   (cpu_data_out),
+      .READ_write (READ_write),
+      .data_in    (data_in_cpu),
+      .data_out   (data_out_cpu),
       .address_out(address_out)
   );
 
-  memory #(
-      .init_file("synthesis/ram_init.mif"),
-      .depth(9)
-  ) ram (
-      .address    (address_out),
-      .data_in    (cpu_data_out),
-      .data_out   (cpu_data_in),
-      .wrt_en     (read_write),
-      .clk        (clk),
-      .chip_select(1'b1),
+  logic [7:0] ram_out;
+  logic ram_cs;
+  assign ram_cs = address_out < 16'h800;
+  async_ram ram (
+      .address (address_out[11:0]),
+      .data_in (data_in_cpu),
+      .data_out(ram_out),
+      .wrt_en  (READ_write),
+      .out_en  (~READ_write),
+      .chip_en (ram_cs && clk)
   );
 
+  logic [7:0] rom_out;
+  logic rom_cs;
+  assign rom_cs = address_out >= 16'h8000;
+  rom #(
+      .init_file("rom.hex"),
+      .depth(10)
+  ) prg_rom (
+      .address (address_out[14:0]),
+      .data_out(rom_out),
+      .clk     (~clk)
+  );
 
-  //   logic [7:0] port_a_in, port_b_in;
-  //   logic [7:0] port_a_out, port_b_out;
+  logic [7:0] port_a_in, port_a_out, port_b_in, port_b_out;
+  logic [7:0] interface_adapter_out;
+  logic interface_adapter_cs;
+  assign interface_adapter_cs = address_out >= 16'h800 && address_out < 16'h810;
+  interface_adapter interface_adapter (
+      .port_a_in      (port_a_in),
+      .port_a_out     (port_a_out),
+      .port_b_in      (port_b_in),
+      .port_b_out     (port_b_out),
+      .data_in        (data_out_cpu),
+      .data_out       (interface_adapter_out),
+      .register_select(address_out[3:0]),
+      .chip_en        (interface_adapter_cs),
+      .clk            (clk),
+      .reset          (reset)
+  );
 
-  //   interface_adapter interface_adapter (
-  //       .port_a_in      (port_a_in),
-  //       .port_a_out     (port_a_out),
-  //       .port_b_in      (port_b_in),
-  //       .port_b_out     (port_b_out),
-  //       .data_in        (cpu_data_out),
-  //       .data_out       (cpu_data_in),
-  //       .register_select(address_out[0:3]),
-  //       .chip_en1       (chip_en1),
-  //       .clk            (clk),
-  //       .reset          (reset),
-  //       .readb_write    (readb_write)
-  //   );
-
-  logic [7:0] port_a;
-  logic [7:0] port_b;
-  always_ff @(posedge clk) begin : blockName
-    if (read_write) begin
-      if (address_out == 16'hffff) begin
-        port_a <= cpu_data_out;
-      end else if (address_out == 16'hfffe) begin
-        port_b <= cpu_data_out;
-      end
+  always_comb begin
+    data_in_cpu = 8'bz;
+    if (interface_adapter_cs) begin
+      data_in_cpu = interface_adapter_out;
+    end else if (rom_cs) begin
+      data_in_cpu = rom_out;
+    end else if (ram_cs) begin
+      data_in_cpu = ram_out;
     end
   end
 

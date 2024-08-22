@@ -282,13 +282,13 @@ module control_unit (
     next_addr_mode = instruction_set::AddrModeZpg;
     case (current_instr_state)
       InstructionDecode: begin
-        next_instr_state = InstructionMem1;
+        next_instr_state = InstructionExec1;
         ctrl_signals[control_signals::CtrlIncEnablePc] = 1;
         ctrl_signals[control_signals::CtrlLoadAddrLow] = 1;
       end
       default: begin
         current_address_low_bus_input  = bus_sources::AddressLowSrcAddrLowReg;
-        current_address_high_bus_input = bus_sources::AddressHighSrcAddrHighReg;
+        current_address_high_bus_input = bus_sources::AddressHighSrcZero;
         opcode_exec();
       end
     endcase
@@ -338,7 +338,7 @@ module control_unit (
       end
       default: begin
         current_address_low_bus_input  = bus_sources::AddressLowSrcAddrLowReg;
-        current_address_high_bus_input = bus_sources::AddressHighSrcAddrHighReg;
+        current_address_high_bus_input = bus_sources::AddressHighSrcZero;
         opcode_exec();
       end
     endcase
@@ -402,6 +402,7 @@ module control_unit (
       instruction_set::OpcLDA_abs:  exec_lda();
       instruction_set::OpcLDA_absx: exec_lda();
       instruction_set::OpcLDA_absy: exec_lda();
+      instruction_set::OpcLDA_zpg:  exec_lda();
 
       instruction_set::OpcLDX_imm:  exec_ldx();
       instruction_set::OpcLDX_abs:  exec_ldx();
@@ -432,10 +433,12 @@ module control_unit (
       instruction_set::OpcSEC_impl: exec_sec();
 
       instruction_set::OpcSTA_abs:  exec_sta();
+      instruction_set::OpcSTA_zpg:  exec_sta();
       instruction_set::OpcSTA_absx: exec_sta();
       instruction_set::OpcSTA_absy: exec_sta();
 
       instruction_set::OpcSTX_abs: exec_stx();
+      instruction_set::OpcSTX_zpg: exec_stx();
 
       instruction_set::OpcSTY_abs: exec_sty();
 

@@ -1,0 +1,216 @@
+$date
+	Wed Aug 07 13:55:31 2024
+$end
+$version
+	ModelSim Version 2020.1
+$end
+$timescale
+	1ns
+$end
+$scope module cpu6502_test $end
+$var reg 8 ! data_in_cpu [7:0] $end
+$var reg 8 " data_out_cpu [7:0] $end
+$var reg 1 # clk $end
+$var reg 1 $ reset $end
+$var reg 1 % READ_write $end
+$var reg 16 & address_out [15:0] $end
+$scope module cpu6502 $end
+$var integer 32 ' instruction_register $end
+$scope module control_unit $end
+$var integer 32 ( current_instr_state $end
+$var integer 32 ) current_addr_mode $end
+$upscope $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+#0
+b10101001 !
+b10101001 "
+b1 #
+b1 $
+b0 %
+b0 &
+b0 '
+bx1 (
+bx )
+b0 %
+bx1 (
+b0 '
+b0 &
+b10101001 !
+b10101001 "
+#10
+b0 #
+#20
+b1 #
+b0 $
+#30
+b0 #
+#40
+b1 #
+bx (
+bx0 )
+bx0xxxxxx '
+b1 &
+b1 !
+b1 "
+#50
+b0 #
+#60
+b1 #
+bx1 (
+bx )
+#70
+b0 #
+#80
+b1 #
+bx1 (
+b10 &
+b10001101 !
+b10001101 "
+#90
+b0 #
+#100
+b1 #
+bx (
+bx0 )
+bx '
+b11 &
+b11111111 !
+b11111111 "
+#110
+b0 #
+#120
+b1 #
+bx1 (
+bx )
+b100 &
+b1 !
+b1 "
+#130
+b0 #
+#140
+b1 #
+bx1 (
+b111111111 &
+bx !
+b1 "
+b1 %
+#150
+b0 #
+#160
+b1 #
+bx1 (
+b10001101 !
+b101 &
+b0 %
+b10001101 "
+#170
+b0 #
+#180
+b1 #
+bx (
+bx0 )
+b110 &
+b11111110 !
+b11111110 "
+#190
+b0 #
+#200
+b1 #
+bx1 (
+bx )
+b111 &
+b1 !
+b1 "
+#210
+b0 #
+#220
+b1 #
+bx1 (
+b111111110 &
+bx !
+b1 "
+b1 %
+#230
+b0 #
+#240
+b1 #
+bx1 (
+b10001101 !
+b1000 &
+b0 %
+b10001101 "
+#250
+b0 #
+#260
+b1 #
+bx (
+bx0 )
+b1001 &
+b11111111 !
+b11111111 "
+#270
+b0 #
+#280
+b1 #
+bx1 (
+bx )
+b1010 &
+#290
+b0 #
+#300
+b1 #
+bx1 (
+b1111111111111111 &
+bx !
+b1 "
+b1 %
+#310
+b0 #
+#320
+b1 #
+bx1 (
+b1011 &
+b0 %
+b10101101 "
+b10101101 !
+#330
+b0 #
+#340
+b1 #
+bx (
+bx0 )
+bx0xxxxxx '
+b1100 &
+b11111111 !
+b11111111 "
+#350
+b0 #
+#360
+b1 #
+bx1 (
+bx )
+b1101 &
+b1 !
+b1 "
+#370
+b0 #
+#380
+b1 #
+bx1 (
+b111111111 &
+b1 !
+b1 "
+#390
+b0 #
+#400
+b1 #
+bx1 (
+b1110 &
+b11000 !
+b11000 "
+#410
+b0 #
+#420
+b1 #

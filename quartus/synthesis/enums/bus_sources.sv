@@ -40,6 +40,8 @@ package bus_sources;
 
     AddressHighSrcAddrHighReg,
 
+    AddressHighSrcZero,
+
     AddressHighSrcStackPointer,
     AddressHighSrcDataBus,
 
