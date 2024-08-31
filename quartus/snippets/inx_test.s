@@ -2,13 +2,16 @@ DDRA=$0803
 DDRB=$0802
 PORTA=$0801
 PORTB=$0800
+  
+  .org $8000
 
-reset:
-  ldx #$00
+  lda #$ff 
+  sta DDRA ; Set PORTA as output
+
+  ldx #00 ; x = 0
 loop:
-  stx $00
-  lda $00
+  stx $00 ; ram[0] = x
+  lda $00 ; a = ram[0]
+  sta PORTA ; print a
   inx
-  bne loop
-
-  jmp reset
+  jmp loop

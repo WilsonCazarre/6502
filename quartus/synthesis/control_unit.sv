@@ -407,6 +407,7 @@ module control_unit (
       instruction_set::OpcLDX_imm:  exec_ldx();
       instruction_set::OpcLDX_abs:  exec_ldx();
       instruction_set::OpcLDX_absy: exec_ldx();
+      instruction_set::OpcLDX_zpg:  exec_ldx();
 
       instruction_set::OpcLDY_imm:  exec_ldy();
       instruction_set::OpcLDY_abs:  exec_ldy();

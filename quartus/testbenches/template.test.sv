@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module template_test ();
+module processador_test ();
   logic clk = 1;
   always #10 clk = ~clk;
 
