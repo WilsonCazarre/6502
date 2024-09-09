@@ -7,12 +7,12 @@ module dev (
     // //////////// SEG7 //////////
     output [ 0:6] HEX0,
     output [ 0:6] HEX1,
-    // output [ 0:6] HEX2,
-    // output [ 6:0] HEX3,
+    output [ 0:6] HEX2,
+    output [ 6:0] HEX3,
     output [ 0:6] HEX4,
     output [ 0:6] HEX5,
-    // output [ 0:6] HEX6,
-    // output [ 0:6] HEX7,
+    output [ 0:6] HEX6,
+    output [ 0:6] HEX7,
     /////////// PUSH BUTTON ////
     input  [17:0] SW,
     /////////// LEDS //////////
@@ -55,27 +55,31 @@ module dev (
 
   hex_display hex_display_a (
       .value       (port_a_out),
-      .hex_ones    (HEX0),
-      .hex_sixteens(HEX1),
-  );
-
-  hex_display hex_display_b (
-      .value       (port_b_out),
       .hex_ones    (HEX4),
       .hex_sixteens(HEX5),
   );
 
-  // bcd_display bcd_display (
-  //     .value       (port_a),
-  //     .hex_ones    (HEX2),
-  //     .hex_tens    (HEX1),
-  //     .hex_hundreds(HEX0)
-  // );
+  hex_display hex_display_b (
+      .value       (port_b_out),
+      .hex_ones    (HEX6),
+      .hex_sixteens(HEX7),
+  );
+
+  bcd_display bcd_display (
+      .value       (port_a_out),
+      .hex_ones    (HEX2),
+      .hex_tens    (HEX1),
+      .hex_hundreds(HEX0)
+  );
+
+  logic clk_div;
 
   clock u_clock (
       .clk_in (CLOCK_50),
-      .clk_out(clk)
+      .clk_out(clk_div)
   );
+
+  assign clk = SW[2] ? CLOCK_50 : clk_div;
 
   cpu6502 cpu6502 (
       .reset      (reset),
@@ -89,6 +93,7 @@ module dev (
   logic [7:0] ram_out;
   logic ram_cs;
   assign ram_cs = address_out < 16'h800;
+
   // async_ram ram (
   //     .address (address_out[11:0]),
   //     .data_in (data_out_cpu),
@@ -122,6 +127,7 @@ module dev (
   logic [7:0] port_a_in, port_a_out, port_b_in, port_b_out;
   logic [7:0] interface_adapter_out;
   logic interface_adapter_cs;
+  assign port_b_in = SW[17:9];
   assign interface_adapter_cs = address_out >= 16'h800 && address_out < 16'h810;
   interface_adapter interface_adapter (
       .port_a_in      (port_a_in),
@@ -149,6 +155,7 @@ module dev (
 
   assign LEDR = ~SW[1] ? {address_out, 2'b0} : {port_a_out, 2'b0, port_b_out};
 
+  assign HEX3 = 7'hff;
   // assign LCD_EN = port_a_out[7];
   // assign LCD_RW = port_a_out[6];
   // assign LCD_RS = port_a_out[5];

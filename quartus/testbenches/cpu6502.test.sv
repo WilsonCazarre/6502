@@ -70,6 +70,7 @@ module cpu6502_test ();
   end
   initial begin
     reset = 1;
+    port_b_in = 8'h6;
 
     repeat (1) @(posedge clk);
     reset = 0;

@@ -1,6 +1,6 @@
 module rom #(
     parameter init_file = "synthesis/rom_init.mif",
-    depth = 8192
+    depth = 15
 ) (
     input clk,
     input logic [14:0] address,

@@ -4,14 +4,14 @@ PORTA=$0801
 PORTB=$0800
   
   .org $8000
+reset:
+  lda #$00 
+  sta DDRB ; Set PORTB as input
 
-  lda #$ff 
-  sta DDRA ; Set PORTA as output
+  lda #$ff
+  sta DDRA ; Set PORTB as output
 
-  ldx #00 ; x = 0
 loop:
-  stx $00 ; ram[0] = x
-  lda $00 ; a = ram[0]
-  sta PORTA ; print a
-  inx
+  lda PORTB
+  sta PORTA
   jmp loop

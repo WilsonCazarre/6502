@@ -1,12 +1,15 @@
-PORTA=$ffff
-PORTB=$fffe
+DDRA=$0803
+DDRB=$0802
+PORTA=$0801
+PORTB=$0800
 
-EN=%10000000
-RW=%01000000
-RS=%00100000
+; EN=%10000000
+; RW=%01000000
+; RS=%00100000
 
-N_1=$01ff
-N_2=$01fe
+N1=$00
+N2=$01
+R=$02
 
 
   ; lda #%00111000 ; Set 8-bit mode; 2-line display; 5x8 font
@@ -29,18 +32,33 @@ N_2=$01fe
   ; lda #0         ; Clear E/RW/RS
   ; sta PORTA
 
+  .org $8000
+  
+  lda #$00 ; 0 - Input / 1 - Output
+  sta DDRB
+
+  lda #$ff
+  sta DDRA
+
 restart:
-  lda #1
-  sta N_1
-  sta N_2
-  sta PORTA
+  lda #$01
+  sta N1
+  sta N2
+  sta R
 loop:
-  lda N_1
-  clc
-  adc N_2
-  bcs restart
-  ldx N_1
-  sta N_1
+  lda R
+  cmp PORTB
+  bcc restart
   sta PORTA
-  stx N_2
+  lda N1
+  clc
+  adc N2
+  sta R
+  lda N2
+  sta N1
+  lda R
+  sta N2
   jmp loop
+
+
+

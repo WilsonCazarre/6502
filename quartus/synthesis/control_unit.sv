@@ -55,6 +55,10 @@ module control_unit (
 
     case (current_instr_state)
       InstructionFetch: begin
+        current_data_bus_input = bus_sources::DataBusSrcDataIn;
+        current_address_low_bus_input = bus_sources::AddressLowSrcPcLow;
+        current_address_high_bus_input = bus_sources::AddressHighSrcPcHigh;
+
         next_instr_state = InstructionDecode;
         ctrl_signals[control_signals::CtrlLoadInstReg] = 1;
         ctrl_signals[control_signals::CtrlIncEnablePc] = 1;
@@ -134,8 +138,12 @@ module control_unit (
           instruction_set::OpcORA_zpg:  zpg_addr_mode();
 
           instruction_set::OpcPHA_impl: impl_addr_mode();
+          instruction_set::OpcPHX_impl: impl_addr_mode();
+          instruction_set::OpcPHY_impl: impl_addr_mode();
 
           instruction_set::OpcPLA_impl: impl_addr_mode();
+          instruction_set::OpcPLX_impl: impl_addr_mode();
+          instruction_set::OpcPLY_impl: impl_addr_mode();
 
           instruction_set::OpcSBC_imm:  imm_addr_mode();
           instruction_set::OpcSBC_abs:  abs_addr_mode();
@@ -359,11 +367,13 @@ module control_unit (
       instruction_set::OpcADC_abs:  exec_arithmetic_op(control_signals::ALU_ADD);
       instruction_set::OpcADC_absx: exec_arithmetic_op(control_signals::ALU_ADD);
       instruction_set::OpcADC_absy: exec_arithmetic_op(control_signals::ALU_ADD);
+      instruction_set::OpcADC_zpg:  exec_arithmetic_op(control_signals::ALU_ADD);
 
       instruction_set::OpcAND_imm:  exec_logic_op(control_signals::ALU_AND);
       instruction_set::OpcAND_abs:  exec_logic_op(control_signals::ALU_AND);
       instruction_set::OpcAND_absx: exec_logic_op(control_signals::ALU_AND);
       instruction_set::OpcAND_absy: exec_logic_op(control_signals::ALU_AND);
+      instruction_set::OpcAND_zpg:  exec_logic_op(control_signals::ALU_AND);
 
       instruction_set::OpcBCC_abs: exec_branch();
       instruction_set::OpcBCS_abs: exec_branch();
@@ -380,20 +390,24 @@ module control_unit (
       instruction_set::OpcCMP_abs:  exec_cmp(bus_sources::DataBusSrcRegAccumulator);
       instruction_set::OpcCMP_absx: exec_cmp(bus_sources::DataBusSrcRegAccumulator);
       instruction_set::OpcCMP_absy: exec_cmp(bus_sources::DataBusSrcRegAccumulator);
+      instruction_set::OpcCMP_zpg:  exec_cmp(bus_sources::DataBusSrcRegAccumulator);
 
       instruction_set::OpcCPX_imm: exec_cmp(bus_sources::DataBusSrcRegX);
       instruction_set::OpcCPX_abs: exec_cmp(bus_sources::DataBusSrcRegX);
+      instruction_set::OpcCPX_zpg: exec_cmp(bus_sources::DataBusSrcRegX);
 
       instruction_set::OpcCPY_imm: exec_cmp(bus_sources::DataBusSrcRegY);
       instruction_set::OpcCPY_abs: exec_cmp(bus_sources::DataBusSrcRegY);
+      instruction_set::OpcCPY_zpg: exec_cmp(bus_sources::DataBusSrcRegY);
 
       instruction_set::OpcEOR_imm:  exec_logic_op(control_signals::ALU_XOR);
       instruction_set::OpcEOR_abs:  exec_logic_op(control_signals::ALU_XOR);
       instruction_set::OpcEOR_absx: exec_logic_op(control_signals::ALU_XOR);
       instruction_set::OpcEOR_absy: exec_logic_op(control_signals::ALU_XOR);
+      instruction_set::OpcEOR_zpg:  exec_logic_op(control_signals::ALU_XOR);
 
-      instruction_set::OpcINC_impl: exec_inc();
       instruction_set::OpcINX_impl: exec_inx();
+
       instruction_set::OpcINY_impl: exec_iny();
 
       instruction_set::OpcJMP_abs: exec_jmp();
@@ -412,11 +426,13 @@ module control_unit (
       instruction_set::OpcLDY_imm:  exec_ldy();
       instruction_set::OpcLDY_abs:  exec_ldy();
       instruction_set::OpcLDY_absx: exec_ldy();
+      instruction_set::OpcLDY_zpg:  exec_ldy();
 
       instruction_set::OpcORA_imm:  exec_logic_op(control_signals::ALU_OR);
       instruction_set::OpcORA_abs:  exec_logic_op(control_signals::ALU_OR);
       instruction_set::OpcORA_absx: exec_logic_op(control_signals::ALU_OR);
       instruction_set::OpcORA_absy: exec_logic_op(control_signals::ALU_OR);
+      instruction_set::OpcORA_zpg:  exec_logic_op(control_signals::ALU_OR);
 
       instruction_set::OpcPHA_impl: exec_pha(bus_sources::DataBusSrcRegAccumulator);
       instruction_set::OpcPHX_impl: exec_pha(bus_sources::DataBusSrcRegX);
@@ -430,18 +446,20 @@ module control_unit (
       instruction_set::OpcSBC_abs:  exec_arithmetic_op(control_signals::ALU_ADD, 1);
       instruction_set::OpcSBC_absx: exec_arithmetic_op(control_signals::ALU_ADD, 1);
       instruction_set::OpcSBC_absy: exec_arithmetic_op(control_signals::ALU_ADD, 1);
+      instruction_set::OpcSBC_zpg:  exec_arithmetic_op(control_signals::ALU_ADD, 1);
 
       instruction_set::OpcSEC_impl: exec_sec();
 
       instruction_set::OpcSTA_abs:  exec_sta();
-      instruction_set::OpcSTA_zpg:  exec_sta();
       instruction_set::OpcSTA_absx: exec_sta();
       instruction_set::OpcSTA_absy: exec_sta();
+      instruction_set::OpcSTA_zpg:  exec_sta();
 
       instruction_set::OpcSTX_abs: exec_stx();
       instruction_set::OpcSTX_zpg: exec_stx();
 
       instruction_set::OpcSTY_abs: exec_sty();
+      instruction_set::OpcSTY_zpg: exec_sty();
 
       instruction_set::OpcTAX_impl:
       exec_transfer(bus_sources::DataBusSrcRegAccumulator, control_signals::CtrlLoadX);
@@ -579,7 +597,9 @@ module control_unit (
   endtask
 
   task exec_cmp(bus_sources::data_bus_source_t cmp_src);
-    alu_op = control_signals::ALU_SUB;
+    alu_op = control_signals::ALU_ADD;
+    ctrl_signals[control_signals::CtrlAluInvertB] = 1;
+    ctrl_signals[control_signals::CtrlAluCarryIn] = 0;
     case (current_instr_state)
       InstructionExec1: begin
         next_instr_state = InstructionExec2;
@@ -587,6 +607,7 @@ module control_unit (
         ctrl_signals[control_signals::CtrlLoadInputB] = 1;
       end
       InstructionExec2: begin
+        next_instr_state = InstructionExec3;
         current_data_bus_input = cmp_src;
         ctrl_signals[control_signals::CtrlLoadInputA] = 1;
       end

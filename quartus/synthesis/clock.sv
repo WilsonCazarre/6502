@@ -3,7 +3,7 @@ module clock (
     output reg clk_out
 );
   reg [27:0] counter = 28'd0;
-  parameter DIVISOR = 28'd10_000_000;
+  parameter DIVISOR = 28'd10_000_0;
   // parameter DIVISOR = 28'd1;
   // The frequency of the output clk_out
   //  = The frequency of the input clk_in divided by DIVISOR

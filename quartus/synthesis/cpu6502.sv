@@ -69,6 +69,7 @@ module cpu6502 (
       .inc(1'b0),
       .dec(1'b0)
   );
+  
   register RegX (
       .data_in(data_bus),
       .data_out(data_bus_inputs[bus_sources::DataBusSrcRegX]),
