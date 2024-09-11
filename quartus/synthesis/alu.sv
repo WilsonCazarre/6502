@@ -1,7 +1,3 @@
-/*
-ALU.v
-*/
-
 module alu (
     input wire                            carry_in,
     input wire                      [7:0] input_a,
