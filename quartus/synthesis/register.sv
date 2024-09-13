@@ -5,6 +5,8 @@ module register (
     input logic clk,
     input logic load,
     input logic reset,
+    input logic inc,
+    input logic dec
 );
   reg [7:0] current_value;
 

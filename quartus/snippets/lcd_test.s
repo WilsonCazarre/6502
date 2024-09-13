@@ -1,9 +1,17 @@
-PORTA=$ffff
-PORTB=$fffe
+DDRA=$0803
+DDRB=$0802
+PORTA=$0801
+PORTB=$0800
 
 EN=%10000000
 RW=%01000000
 RS=%00100000
+
+  .org $8000
+  lda #$ff
+
+  sta DDRA
+  sta DDRB
 
   lda #%00111000 ; Set 8-bit mode; 2-line display; 5x8 font
   sta PORTB
@@ -175,5 +183,4 @@ RS=%00100000
   lda #RS        
   sta PORTA
 loop:
-  nop
   jmp loop

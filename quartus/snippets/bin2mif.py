@@ -5,7 +5,7 @@ with open("a.out", "rb") as in_file:
 
 
 with open("a.mif", "w") as out_file:
-    code = [f"{address:02x}:{value:02x};\n" for address, value in enumerate(data)]
+    code = [f"{address:04x}:{value:02x};\n" for address, value in enumerate(data)]
     out_file.writelines(
         [
             f"DEPTH={len(code)};\n",

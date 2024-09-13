@@ -3,6 +3,7 @@ typedef enum logic [3:0] {
   ORA_IRA,
   DDRB,
   DDRA,
+
   CtrlRegisterEndMarker
 } ctrl_register;
 

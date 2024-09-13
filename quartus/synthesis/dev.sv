@@ -18,23 +18,13 @@ module dev (
     /////////// LEDS //////////
     output [17:0] LEDR,
     output [ 8:0] LEDG,
-    //////////// Flash //////////
-    // output [22:0] FL_ADDR,
-    // output        FL_CE_N,
-    // inout  [ 7:0] FL_DQ,
-    // output        FL_OE_N,
-    // output        FL_RST_N,
-    // input         FL_RY,
-    // output        FL_WE_N,
-    // output        FL_WP_N,
     //////////// LCD //////////
-    // output        LCD_BLON,
-    // output [ 7:0] LCD_DATA,
-    // output        LCD_EN,
-    // output        LCD_ON,
-    // output        LCD_RS,
-    // output        LCD_RW,
-
+    output        LCD_BLON,
+    output [ 7:0] LCD_DATA,
+    output        LCD_EN,
+    output        LCD_ON,
+    output        LCD_RS,
+    output        LCD_RW,
     //////////// SRAM //////////
     output [19:0] SRAM_ADDR,
     output        SRAM_CE_N,
@@ -94,15 +84,6 @@ module dev (
   logic ram_cs;
   assign ram_cs = address_out < 16'h800;
 
-  // async_ram ram (
-  //     .address (address_out[11:0]),
-  //     .data_in (data_out_cpu),
-  //     .data_out(ram_out),
-  //     .wrt_en  (read_write),
-  //     .out_en  (~read_write),
-  //     .chip_en (ram_cs && clk)
-  // );
-
   assign ram_out = read_write ? 8'bz : SRAM_DQ[7:0];
   assign SRAM_DQ = read_write ? {8'b0, data_out_cpu} : 16'bz;
   assign SRAM_ADDR = {8'b0, address_out[11:0]};
@@ -161,7 +142,7 @@ module dev (
   // assign LCD_RS = port_a_out[5];
   // assign LCD_ON = 1'b1;
   // assign LCD_BLON = SW[2];
-  // assign LCD_DATA = port_b;
+  // assign LCD_DATA = port_b_out;
 
 
 endmodule

@@ -1,3 +1,6 @@
+/*
+  Binary into BCD conversion using the Double Dabble algorithm
+*/
 module bcd_display (
     input  [7:0] value,
     output [6:0] hex_ones,
@@ -10,10 +13,6 @@ module bcd_display (
   assign ones = bcd[11:8];
   assign tens = bcd[7:4];
   assign hundreds = bcd[3:0];
-
-  //output ports and, their size
-
-  //Internal variables
   reg [3:0] i;
 
   //Always block - implement the Double Dabble algorithm
@@ -25,7 +24,7 @@ module bcd_display (
         begin
       bcd = {bcd[10:0], value[7-i]};  //concatenation
 
-      //if a hex digit of 'bcd' is more than 4, add 3 to it.  
+      // if a hex digit of 'bcd' is more than 4, add 3 to it.  
       if (i < 7 && bcd[3:0] > 4) bcd[3:0] = bcd[3:0] + 3;
       if (i < 7 && bcd[7:4] > 4) bcd[7:4] = bcd[7:4] + 3;
       if (i < 7 && bcd[11:8] > 4) bcd[11:8] = bcd[11:8] + 3;
