@@ -456,6 +456,17 @@ Idêntico ao Endereçamento Absoluto deslocado em X (ou Y), exceto que o endere�
 de acesso está sempre nos primeiros 256 bytes do espaço de memória
 (\autoref{fig:address:absx}).
 
+\section{6522 - \emph{Versatile Interface Adapter}}
+O 6522 é uma dispositivo projetado para uso com os microprocessadores da família 65xx \cite{w65c22Datasheet}.
+Dentre as suas funções estão inclusos:
+\begin{itemize}
+	\item 16 Pinos GPIO bidirecionais (disponíveis por meio de dois registradores de 8 bits)
+	\item Timer/Contador de programável de 16-bits
+	\item Registrador de deslocamento de 8 bits
+\end{itemize}
+Os pinos de GPIO são acessados por meio dos registradores \code{PORTA} e \code{PORTB}, e a direção (entrada ou saída)
+de cada um dos bits nesses registradores pode ser controlada por meio dos registradores de direção de dados \code{DDRA} e \code{DDRB}.
+
 \section{RTL - \emph{Register-Transfer Logic}}
 Quando tratamos do design de circuitos digitais complexos, é comum abstrairmos
 diferentes níveis do design com a intenção de tornar esses problemas mais
@@ -535,70 +546,56 @@ O conjunto de instruções apresentado na \autoref{tab:instSet} é apenas um
 subconjunto da família MCS650X original. Os mesmos \emph{opcodes} da arquitetura
 original serão mantidos aqui \cite{6502isa}.
 
-\begin{center}
+\begin{figure}
 	\fontsize{9}{11}\selectfont
-	\begin{longtable}{|l|c|c|c|p{7cm}|}
-		\caption{Conjunto de instruções} \label{tab:instSet}                                                                                   \\
+	\begin{longtable}{|l|p{4cm}|c|c|c|c|c|c|c|c|c|}
+		\caption{Matriz de Opcodes por modo de endereçamento} \label{tab:instSet}                                                                                                                  \\
 		\hline
-		\multicolumn{5}{|c|}{\textbf{Instruções de transferência}}                                                                             \\ \hline
-		\textbf{Instrução}   & \textbf{Opcode} & \textbf{Mod. End} & \textbf{Assembly}      & \textbf{Operação}                                \\ \hline
-		\multirow{3}{*}{LDA} & a9              & imm               & \codenobg{LDA imm}     & \codenobg{RegAC <= imm}                          \\ \cline{2-5}
-		                     & ad              & abs               & \codenobg{LDA addr}    & \codenobg{RegAC <= Mem[addr]}                    \\ \cline{2-5}
-		                     & bd              & (abs, x)          & \codenobg{LDA addr, x} & \codenobg{RegAC <= Mem[addr + x]}                \\ \hline
-		\multirow{3}{*}{LDX} & a2              & imm               & \codenobg{LDX imm}     & \codenobg{RegX <= imm}                           \\ \cline{2-5}
-		                     & ae              & abs               & \codenobg{LDX addr}    & \codenobg{RegX <= Mem[addr]}                     \\ \cline{2-5}
-		                     & be              & (abs, y)          & \codenobg{LDY addr, y} & \codenobg{RegY <= Mem[addr + x]}                 \\ \hline
-		\multirow{3}{*}{LDY} & a0              & imm               & \codenobg{LDY imm}     & \codenobg{RegY <= imm}                           \\ \cline{2-5}
-		                     & ac              & abs               & \codenobg{LDY addr}    & \codenobg{RegY <= Mem[addr]}                     \\ \cline{2-5}
-		                     & bc              & (abs, x)          & \codenobg{LDY addr, x} & \codenobg{RegY <= Mem[addr + x]}                 \\ \hline
-		\multirow{2}{*}{STA} & 8d              & abs               & \codenobg{STA addr}    & \codenobg{Mem[addr]<= RegAC}                     \\ \cline{2-5}
-		                     & 9d              & (abs, x)          & \codenobg{STA addr, x} & \codenobg{Mem[addr + x]<= RegAC}                 \\ \hline
-		\multirow{1}{*}{STX} & 8e              & abs               & \codenobg{STX addr}    & \codenobg{Mem[addr]<= RegX}                      \\ \hline
-		\multirow{1}{*}{STY} & 8c              & abs               & \codenobg{STY addr}    & \codenobg{Mem[addr]<= RegY}                      \\ \hline
-		\multicolumn{5}{|c|}{\textbf{Instruções lógicas e aritméticas}}                                                                        \\ \hline
-		\textbf{Instrução}   & \textbf{Opcode} & \textbf{Mod. End} & \textbf{Assembly}      & \textbf{Operação}                                \\ \hline
-		\multirow{3}{*}{ADC} & 69              & imm               & \codenobg{ADC imm}     & \codenobg{RegAC <= RegAC + imm + C}              \\ \cline{2-5}
-		                     & 6d              & abs               & \codenobg{ADC addr}    & \codenobg{RegAC <= RegAC + Mem[addr] + C}        \\ \cline{2-5}
-		                     & 7d              & (abs, x)          & \codenobg{ADC addr, x} & \codenobg{RegAC <= RegAC + Mem[addr + x] + C}    \\ \hline
-		\multirow{3}{*}{SBC} & e9              & imm               & \codenobg{SBC imm}     & \codenobg{RegAC <= RegAC - imm - C}              \\ \cline{2-5}
-		                     & ed              & abs               & \codenobg{SBC addr}    & \codenobg{RegAC <= RegAC - Mem[addr] - C}        \\ \cline{2-5}
-		                     & fd              & (abs, x)          & \codenobg{SBC addr, x} & \codenobg{RegAC <= RegAC - Mem[addr + x] - C}    \\ \hline
-		\multirow{3}{*}{AND} & 29              & imm               & \codenobg{AND imm}     & \codenobg{RegAC <= RegAC AND imm}                \\ \cline{2-5}
-		                     & 2d              & abs               & \codenobg{AND addr}    & \codenobg{RegAC <= RegAC AND Mem[addr]}          \\ \cline{2-5}
-		                     & 3d              & (abs, x)          & \codenobg{AND addr, x} & \codenobg{RegAC <= RegAC AND Mem[addr + x]}      \\ \hline
-		\multirow{3}{*}{EOR} & 49              & imm               & \codenobg{EOR imm}     & \codenobg{RegAC <= RegAC XOR imm}                \\ \cline{2-5}
-		                     & 4d              & abs               & \codenobg{EOR addr}    & \codenobg{RegAC <= RegAC XOR Mem[addr]}          \\ \cline{2-5}
-		                     & 5d              & (abs, x)          & \codenobg{EOR addr, x} & \codenobg{RegAC <= RegAC XOR Mem[addr + x]}      \\ \hline
-		\multirow{2}{*}{ORA} & 09              & imm               & \codenobg{ORA imm}     & \codenobg{RegAC <= RegAC OR imm}                 \\ \cline{2-5}
-		                     & 0d              & abs               & \codenobg{ORA addr}    & \codenobg{RegAC <= RegAC OR Mem[addr]}           \\ \hline
-		\multirow{1}{*}{ORA} & 1d              & (abs, x)          & \codenobg{ORA addr, x} & \codenobg{RegAC <= RegAC OR Mem[addr + x]}       \\ \hline
-		\multicolumn{5}{|c|}{\textbf{Comparação}}                                                                                              \\ \hline
-		\textbf{Instrução}   & \textbf{Opcode} & \textbf{Mod. End} & \textbf{Assembly}      & \textbf{Operação}                                \\ \hline
-		\multirow{3}{*}{CMP} & c9              & imm               & \codenobg{CMP imm}     & \codenobg{C, N, V, Z <= ACC - imm }              \\ \cline{2-5}
-		                     & cd              & abs               & \codenobg{CMP addr}    & \codenobg{C, N, V, Z <= ACC - Mem[addr] }        \\ \cline{2-5}
-		                     & dd              & (abs, x)          & \codenobg{CMP addr, x} & \codenobg{C, N, V, Z <= ACC - Mem[addr - x] }    \\ \hline
-		\multicolumn{5}{|c|}{\textbf{Flags}}                                                                                                   \\ \hline
-		\textbf{Instrução}   & \textbf{Opcode} & \textbf{Mod. End} & \textbf{Assembly}      & \textbf{Operação}                                \\ \hline
-		\multirow{1}{*}{SEC} & 38              & impl              & \codenobg{SEC}         & \codenobg{C <= 1}                                \\ \hline
-		\multirow{1}{*}{CLC} & 18              & impl              & \codenobg{CLC}         & \codenobg{C <= 0}                                \\ \hline
-		\multicolumn{5}{|c|}{\textbf{Instruções de \emph{branch}}}                                                                             \\ \hline
-		\textbf{Instrução}   & \textbf{Opcode} & \textbf{Mod. End} & \textbf{Assembly}      & \textbf{Operação}                                \\ \hline
-		\multirow{1}{*}{BCC} & 90              & rel               & \codenobg{BCC}         & \codenobg{branch on C = 0}                       \\ \hline
-		\multirow{1}{*}{BCS} & b0              & rel               & \codenobg{BCS}         & \codenobg{branch on C = 1}                       \\ \hline
-		\multirow{1}{*}{BEQ} & f0              & rel               & \codenobg{BEQ}         & \codenobg{branch on Z = 1}                       \\ \hline
-		\multirow{1}{*}{BMI} & 30              & rel               & \codenobg{BMI}         & \codenobg{branch on N = 1}                       \\ \hline
-		\multirow{1}{*}{BNE} & d0              & rel               & \codenobg{BNE}         & \codenobg{branch on Z = 0}                       \\ \hline
-		\multirow{1}{*}{BPL} & 10              & rel               & \codenobg{BPL}         & \codenobg{branch on N = 0}                       \\ \hline
-		\multirow{1}{*}{BVC} & 50              & rel               & \codenobg{BVC}         & \codenobg{branch on V = 0}                       \\ \hline
-		\multirow{1}{*}{BVS} & 70              & rel               & \codenobg{BVS}         & \codenobg{branch on V = 1}                       \\ \hline
-		\multicolumn{5}{|c|}{\textbf{Instruções de controle}}                                                                                  \\ \hline
-		\multirow{1}{*}{JMP} & 6c              & abs               & \codenobg{JMP HHLL}    & \codenobg{PCL <= LL}\newline\codenobg{PCH <= HH} \\ \hline
-		\multirow{1}{*}{NOP} & ea              & impl              & \codenobg{NOP}         &                                                  \\ \hline
-		\multirow{1}{*}{HLT} & db              & impl              & \codenobg{HLT}         &                                                  \\ \hline
+		% \multicolumn{5}{|c|}{\textbf{Instruções de transferência}}                                       \\ \hline
+		\textbf{Instrução} & \textbf{Operação}             & \textbf{\#} & \textbf{a}    & \textbf{a, x} & \textbf{a,y} & \textbf{zp} & \textbf{zp, x} & \textbf{s} & \textbf{impl} & \textbf{rel} \\ \hline
+		ADC                & \codenobg{A <= A + M + C}     & 69          & 6d            & 7d            & 79           & 65          &                &            &               &              \\ \hline
+		AND                & \codenobg{A <= A AND M}       & 29          & 2d            & 3d            & 39           & 25          &                &            &               &              \\ \hline
+		BCC                & \codenobg{Branch If C == 0}   &             &               &               &              &             &                &            &               & 90           \\ \hline
+		BCC                & \codenobg{Branch If C == 1}   &             &               &               &              &             &                &            &               & b0           \\ \hline
+		BEQ                & \codenobg{Branch If Z == 1}   &             &               &               &              &             &                &            &               & f0           \\ \hline
+		BMI                & \codenobg{Branch If N == 1}   &             &               &               &              &             &                &            &               & 30           \\ \hline
+		BNQ                & \codenobg{Branch If Z == 0}   &             &               &               &              &             &                &            &               & d0           \\ \hline
+		BPL                & \codenobg{Branch If N == 0}   &             &               &               &              &             &                &            &               & 10           \\ \hline
+		BVC                & \codenobg{Branch If V == 0}   &             &               &               &              &             &                &            &               & 50           \\ \hline
+		BVS                & \codenobg{Branch If V == 1}   &             &               &               &              &             &                &            &               & 70           \\ \hline
+		CLC                & \codenobg{C <= 0}             &             &               &               &              & 18          &                &            &               &              \\ \hline
+		CMP                & \codenobg{A - M}              &             & \codenobg{c9} & cd            & dd           &             & c5             & d9         &               &              \\ \hline
+		CPX                & \codenobg{X - M}              &             & \codenobg{e0} & ec            &              &             & e4             &            &               &              \\ \hline
+		CPY                & \codenobg{Y - M}              &             & \codenobg{c0} & e4            &              &             & c4             &            &               &              \\ \hline
+		EOR                & \codenobg{A <= A XOR M}       & 49          & 4d            & 5d            & 59           & 45          & c4             &            &               &              \\ \hline
+		INX                & \codenobg{Increment X}        &             &               &               &              &             &                &            & e8            &              \\ \hline
+		INY                & \codenobg{Increment Y}        &             &               &               &              &             &                &            & c8            &              \\ \hline
+		JMP                & \codenobg{Jump M}             &             & 4c            &               &              &             &                &            &               &              \\ \hline
+		LDA                & \codenobg{A <= M}             & a9          & ad            & bd            & b9           & a5          &                &            &               &              \\ \hline
+		LDX                & \codenobg{X <= M}             & a2          & ae            & be            &              & a6          &                &            &               &              \\ \hline
+		LDY                & \codenobg{Y <= M}             & a0          & ac            & bc            &              & a4          &                &            &               &              \\ \hline
+		NOP                &                               &             &               &               &              &             &                &            & ea            &              \\ \hline
+		ORA                & \codenobg{A <= A OR M}        & 09          & 0d            & 1d            & 19           & 05          &                &            &               &              \\ \hline
+		PHA                & \codenobg{Push A, S <= S - 1} &             &               &               &              &             &                &            & 48            &              \\ \hline
+		PHX                & \codenobg{Push X, S <= S - 1} &             &               &               &              &             &                &            & da            &              \\ \hline
+		PHY                & \codenobg{Push Y, S <= S - 1} &             &               &               &              &             &                &            & 5a            &              \\ \hline
+		PLA                & \codenobg{Pull A, S <= S + 1} &             &               &               &              &             &                &            & 68            &              \\ \hline
+		PLX                & \codenobg{Pull X, S <= S + 1} &             &               &               &              &             &                &            & fa            &              \\ \hline
+		PLY                & \codenobg{Pull Y, S <= S + 1} &             &               &               &              &             &                &            & 7a            &              \\ \hline
+		SBC                & \codenobg{A <= A - M + C}     & e9          & ed            & fd            & f9           & e5          &                &            &               &              \\ \hline
+		SEC                & \codenobg{C <= 1}             &             &               &               &              &             &                &            & 38            &              \\ \hline
+		STA                & \codenobg{M <= A}             &             & 8d            & 9d            & 99           & 85          &                &            &               &              \\ \hline
+		STX                & \codenobg{M <= X}             &             & 8e            &               &              & 86          &                &            &               &              \\ \hline
+		STY                & \codenobg{M <= Y}             &             & 8c            &               &              & 84          &                &            &               &              \\ \hline
+		TAX                & \codenobg{X <= A}             &             &               &               &              &             &                &            & aa            &              \\ \hline
+		TAY                & \codenobg{Y <= A}             &             &               &               &              &             &                &            & a8            &              \\ \hline
+		TSX                & \codenobg{X <= S}             &             &               &               &              &             &                &            & ba            &              \\ \hline
+		TXA                & \codenobg{A <= X}             &             &               &               &              &             &                &            & 8a            &              \\ \hline
+		TXS                & \codenobg{S <= X}             &             &               &               &              &             &                &            & 9a            &              \\ \hline
+		TYA                & \codenobg{A <= Y}             &             &               &               &              &             &                &            & 98            &              \\ \hline
 	\end{longtable}
 	\legend{Fonte: Autoria Própria}
-\end{center}
-
+\end{figure}
 
 \section{O \emph{datapath} da implementação}
 A \autoref{fig:6502} mostra o \emph{datapath} que será implementado durante esse
@@ -697,122 +694,73 @@ valor de saída.
 
 \section{Código Fonte do Processador}
 
-O código do processador é apresentado nessa seção. Os componentes de \emph{datapath}
-são descritos em \nameref{code:alu}, \nameref{code:program_counter},
-\nameref{code:register} e \nameref{code:status_register}. O \nameref{code:register}
-é usado para implementar os registradores de propósito geral Acumulador, X e Y.
+O código em sua totalidade está disponível no
+\href{https://github.com/WilsonCazarre/6502}{Github do autor}.
 
-\nameref{code:bus_sources}, \nameref{code:control_signals} e \nameref{code:instruction_set} são usados
-para providenciar constantes que são usadas pelos diversos módulos do projeto.
+Uma breve descrição dos módulos será apresentada aqui.
 
-\begin{longlisting}
-	\caption[Enums para barramentos]{bus{\_}sources.sv}
-	\inputminted{systemverilog}{../quartus/synthesis/enums/bus_sources.sv}
-	\label{code:bus_sources}
-\end{longlisting}
+Com o objetivo de evitar erros redundantes e melhorar consistência ao longo do código,
+arquivos de \emph{enums} foram feitos para nomear diversas constantes:
+\begin{itemize}
+	\item \autoref{attach:instruction_set} Define os opcodes para o conjunto de instruções,
+	      note que cada nome também é acompanhado do seu respectivo modo de endereçamento;
+	\item \autoref{attach:bus_sources} Define todos os valores que podem ser colocados nos barramentos;
+	\item \autoref{attach:control_signals} Define todos os sinais de controle usados no microprocessador.
+\end{itemize}
 
-\begin{longlisting}
-	\caption[Enums para sinais de controle]{control{\_}signals.sv}
-	\inputminted{systemverilog}{../quartus/synthesis/enums/control_signals.sv}
-	\label{code:control_signals}
-\end{longlisting}
+A unidade de integração apresentada no \autoref{attach:cpu6502} é o ponto de entrada do processador
+e descreve como os módulos se comunicam entre si. Note que todas as possíveis entradas para um determinado
+barramento são agrupadas em uma \emph{array} para que possam ser multiplexadas por um sinal de controle.
 
-\begin{longlisting}
-	\caption[Enums para conjunto de instrução]{instruction{\_}set.sv}
-	\inputminted{systemverilog}{../quartus/synthesis/enums/instruction_set.sv}
-	\label{code:instruction_set}
-\end{longlisting}
+A unidade de controle (\autoref{attach:control_unit}) é uma máquina de estados que define uma sub tarefa para cada
+operação e modo de endereçamento. Uma operação e um modo de endereçamento são então combinados para formar um \emph{opcode}
+completo.
 
-\begin{longlisting}
-	\caption[Módulo ULA]{alu.sv}
-	\inputminted[firstline=5]{systemverilog}{../quartus/synthesis/alu.sv}
-	\label{code:alu}
-\end{longlisting}
+\subsection{Unidade de entrada e saída}
+Até o momento tratamos apenas do microprocessador que em seu nenhum momento aborda como
+a entrada e saída deve ser feita. Para isso, uma versão com recursos limitados do 6522 \autoref{attach:via} foi
+implementada em \emph{SystemVerilog} para que pudesse ser interfaceada com o microprocessador.
+Essa placa providencia o 6502 com 16 pinos de GPIO que podem ser reconfigurados a qualquer momento do programa.
+É importante destacar que apenas os registradores \code{PORTA} e \code{PORTB} em conjunto com os registradores de direção de dados \code{DDRA} e \code{DDRB}
+foram implementados nessa versão. Os contadores e temporizadores foram propositalmente deixados de lado nessa implementação.
 
+\subsection{Arquitetura final do microcomputador}
+A \autoref{fig:dev} apresenta como as conexões entre o microprocessador (6502), adaptador de interface (6522)
+e demais periféricos foram realizadas. Os módulos em verde foram implementados em \emph{SystemVerilog} sintetizável
+enquanto os módulos em roxo são dispositivos físicos no kit de desenvolvimento FPGA.
 
-\begin{longlisting}
-	\caption[Módulo Contador de Programa]{program{\_}counter.sv}
-	\inputminted{systemverilog}{../quartus/synthesis/program_counter.sv}
-	\label{code:program_counter}
-\end{longlisting}
+O código para essa implementação pode ser visto no \autoref{attach:dev}.
 
-\begin{longlisting}
-	\caption[Módulo Registrador]{register.sv}
-	\inputminted{systemverilog}{../quartus/synthesis/register.sv}
-	\label{code:register}
-\end{longlisting}
-
-\begin{longlisting}
-	\caption[Módulo Processador]{cpu6502.sv}
-	\inputminted{systemverilog}{../quartus/synthesis/cpu6502.sv}
-	\label{code:cpu}
-\end{longlisting}
-
-\begin{longlisting}
-	\caption[Módulo Registrador de Status]{status{\_}register.sv}
-	\inputminted{systemverilog}{../quartus/synthesis/status_register.sv}
-	\label{code:status_register}
-\end{longlisting}
-
-
-
-\section{Testbenches}\label{sec:testbenches}
-
-Além dos módulos sintetizáveis apresentados na sessão anterior, também foram
-desenvolvidos módulos de \emph{testbench}, com o objetivo de testar os módulos em um ambiente
-digital. Note que para o teste de módulo da ULA, o clock é incluído, apesar de não ser necessário
-visto que a ULA em si não utiliza esse sinal, ele está lá apenas para controlar a passagem de tempo
-durante a simulação.
-
-\begin{longlisting}
-	\caption[Testbench da ULA]{alu.test.sv}
-	\inputminted{systemverilog}{../quartus/testbenches/alu.test.sv}
-	\label{code:alu_test}
-\end{longlisting}
-
-\begin{longlisting}
-	\caption[Testbench do Contador de Programa]{program{\_}counter.test.sv}
-	\inputminted{systemverilog}{../quartus/testbenches/program_counter.test.sv}
-	\label{code:program_counter_test}
-\end{longlisting}
-
-\begin{longlisting}
-	\caption[Testbench do Módulo Registrador]{register.test.sv}
-	\inputminted{systemverilog}{../quartus/testbenches/register.test.sv}
-	\label{code:register_test}
-\end{longlisting}
+\begin{figure}[h]
+	\centering
+	\caption{Macro arquitetura do microcomputador} \label{fig:dev}
+	\includegraphics[width=\columnwidth]{../assets/img/dev.png}
+	\legend{Fonte: Autoria Própria}
+\end{figure}
 
 \chapter{Resultados Obtidos e Discussões}
 
-
-% \begin{figure}[h]
-% 	\centering
-% 	\caption{ALU.sv} \label{code:alu}
-
-% \end{figure}
-
-
 \section{Formas de onda}
-
-Todas as formas de onda foram geradas a partir das testbenches apresentadas na \autoref{sec:testbenches}.
-
 
 \begin{figure}[h]
 	\centering
 	\caption{Teste da ULA} \label{fig:wave:alu}
 	\includesvg[width=\columnwidth]{../assets/waveforms/alu}
+	\legend{Fonte: Autoria Própria}
 \end{figure}
 
 \begin{figure}[h]
 	\centering
 	\caption{Teste do Contador de Programa} \label{fig:wave:pc}
 	\includesvg[width=\columnwidth]{../assets/waveforms/pc}
+	\legend{Fonte: Autoria Própria}
 \end{figure}
 
 \begin{figure}[h]
 	\centering
 	\caption{Teste do Registrador} \label{fig:wave:register}
 	\includesvg[width=\columnwidth]{../assets/waveforms/register}
+	\legend{Fonte: Autoria Própria}
 \end{figure}
 
 O teste da \autoref{fig:wave:cpu} é um teste de integração, onde podemos ver o funcionamento
@@ -834,17 +782,59 @@ o valor esperado já que carregamos o registrador com \code{h20} e depois somamo
 	\centering
 	\caption{Teste da Unidade de Processamento} \label{fig:wave:cpu}
 	\includesvg[width=\columnwidth]{../assets/waveforms/cpu}
+	\legend{Fonte: Autoria Própria}
+\end{figure}
+
+\section{Teste final do processador}
+
+Para provar que o processador é capaz de executar qualquer operação computável foi proposto
+que o mesmo executasse um programa que lesse um valor inserido pelo usuário (por meio das chaves no kit de
+desenvolvimento) e calculasse a sequência de Fibonacci até aquele valor.
+Tal programa é descrito em \autoref{code:fibo}. Note que o carácter \# não indica
+um comentário e sim um valor imediato.
+
+Como o processador foi construído utilizando os mesmos opcodes do 6502 original,
+\emph{assemblers} já existentes podem ser utilizados para gerar o código de máquina
+necessário.
+
+\begin{longlisting}
+	\caption{Assembly para a sequência de Fibonacci}
+	\inputminted[breaklines]{nasm}{../quartus/snippets/fibo.s}
+	\label{code:fibo}
+\end{longlisting}
+
+A figura \autoref{fig:wave:fibo} exibe o processo de cálculo para um valor da sequência.
+De acordo com o que foi descrito no código \emph{assembly}, \code{port{\_}b} é usado
+como valor de entrada e define até qual valor a sequência será calculada. \code{port{\_}a}
+é a saída conectada ao display de 7 segmentos e ele mostra o valor atual da sequência.
+Podemos ver que no começo da sequência o valor mostrado é 2, e na última divisão de tempo apresentada
+o valor muda para 3. Também é possível notar a natureza multi ciclo do processador se observarmos
+que o valor no \code{instruction{\_}register} se mantém constante por alguns ciclos de clock antes do processador
+seguir para uma próxima instrução.
+
+\begin{figure}[h]
+	\centering
+	\caption{Sequência de Fibonacci} \label{fig:wave:fibo}
+	\includesvg[width=\columnwidth]{../assets/waveforms/fibo}
 \end{figure}
 
 \chapter{Considerações Finais}
 
-Em seu estado atual o processador pode executar 3 opcodes do conjunto de instrução.
-Vale também destacar que em nenhum dos testes apresentados o processador realiza acesso a uma memória.
-Todos as operações foram colocadas no barramento de dados pelo próprio simulador.
-Isso se deu ao fato de que o processador ainda não é capaz de executar o endereçamento absoluto.
-
-Como desenvolvimento para os próximos ponto de controle, os demais opcodes serão implementados,
-bem como acesso a memória externa será testado.
+O microprocessador apresentado nesse trabalho é capaz de executar 86 dos 149 opcodes
+disponíveis no 6502 original. Isso já é o suficiente para o sistema ser completo em
+termos de Turing, o que significa que o mesmo é capaz de realizar qualquer operação
+considerado computável.
+Notoriamente alguns recursos importantes estão absentes:
+\begin{itemize}
+	\item Interrupções de hardware e software
+	\item Sequência de \emph{reset} onde o processador busca o ponto de entrada do
+	      programa em um vetor predefinido.
+	\item Subrotinas via instruções \code{JSR} (\emph{Jump to Subroutine}) e
+	      \code{RTS} (\emph{Return from Subroutine})
+	\item Instruções lógicas para rotacionar e deslocar bits (\code{ROL}, \code{ROR}, \code{LSR})
+\end{itemize}
+Esses items serão implementados em trabalhos futuros pois fogem do escopo necessário
+para conclusão dessa disciplina.
 
 % ---
 % Finaliza a parte no bookmark do PDF
@@ -877,6 +867,52 @@ bem como acesso a memória externa será testado.
 	% Imprime uma página indicando o início dos apêndices
 	\partapendices
 
+	\chapter{alu.sv}\label{attach:alu}
+	\inputminted[breaklines]{systemverilog}{../quartus/synthesis/alu.sv}
+
+	\chapter{async{\_}ram.sv}\label{attach:async_ram}
+	\inputminted[breaklines]{systemverilog}{../quartus/synthesis/async_ram.sv}
+
+	\chapter{clock.sv}\label{attach:clock}
+	\inputminted[breaklines]{systemverilog}{../quartus/synthesis/clock.sv}
+
+	\chapter{control{\_}unit.sv}\label{attach:control_unit}
+	\inputminted[breaklines]{systemverilog}{../quartus/synthesis/control_unit.sv}
+
+	\chapter{cpu6502.sv}\label{attach:cpu6502}
+	\inputminted[breaklines]{systemverilog}{../quartus/synthesis/cpu6502.sv}
+
+	\chapter{dev.sv}\label{attach:dev}
+	\inputminted[breaklines]{systemverilog}{../quartus/synthesis/dev.sv}
+
+	\chapter{interface{\_}adapter.sv}\label{attach:via}
+	\inputminted[breaklines]{systemverilog}{../quartus/synthesis/interface_adapter.sv}
+
+	\chapter{program{\_}counter.sv}\label{attach:pc}
+	\inputminted[breaklines]{systemverilog}{../quartus/synthesis/program_counter.sv}
+
+	\chapter{register.sv}\label{attach:reg}
+	\inputminted[breaklines]{systemverilog}{../quartus/synthesis/register.sv}
+
+	\chapter{rom.sv}\label{attach:rom}
+	\inputminted[breaklines]{systemverilog}{../quartus/synthesis/rom.sv}
+
+	\chapter{stack{\_}pointer.sv}\label{attach:sp}
+	\inputminted[breaklines]{systemverilog}{../quartus/synthesis/stack_pointer.sv}
+
+	\chapter{status{\_}register.sv}\label{attach:sr}
+	\inputminted[breaklines]{systemverilog}{../quartus/synthesis/status_register.sv}
+
+	\chapter{status{\_}register.sv}\label{attach:bus_sources}
+	\inputminted[breaklines]{systemverilog}{../quartus/synthesis/enums/bus_sources.sv}
+
+	\chapter{status{\_}register.sv}\label{attach:control_signals}
+
+	\inputminted[breaklines]{systemverilog}{../quartus/synthesis/enums/control_signals.sv}
+
+	\chapter{status{\_}register.sv}\label{attach:instruction_set}
+	\inputminted[breaklines]{systemverilog}{../quartus/synthesis/enums/instruction_set.sv}
+
 \end{apendicesenv}
 % ---
 
@@ -891,6 +927,7 @@ bem como acesso a memória externa será testado.
 \begin{anexosenv}
 	\chapter{Template para testbenches}\label{attach:template}
 	\inputminted{systemverilog}{../quartus/testbenches/template.test.sv}
+	\legend{Fonte: Autoria Própria}
 \end{anexosenv}
 
 
