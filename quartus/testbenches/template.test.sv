@@ -9,6 +9,20 @@ module processador_test ();
   // unit under test
   uut_module uut()
 
+  alu u_alu(
+    .carry_in     (carry_in     ),
+    .input_a      (input_a      ),
+    .input_b      (input_b      ),
+    .invert_b     (invert_b     ),
+    .operation    (operation    ),
+    .alu_out      (alu_out      ),
+    .overflow_out (overflow_out ),
+    .zero_out     (zero_out     ),
+    .negative_out (negative_out ),
+    .carry_out    (carry_out    )
+  );
+  
+
   initial begin
     // write the simulation stimulus here
 

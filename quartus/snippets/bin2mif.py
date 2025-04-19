@@ -16,8 +16,8 @@ with open("../simulation/rom.hex", "w") as out_file:
     #     [
     #         f"DEPTH={len(code)};\n",
     #         f"WIDTH={WIDTH};\n",
-    #         "ADDRESS_RADIX = HEX;\n",
-    #         "DATA_RADIX = HEX;\n",
+    #         "ADDRESS_RADIX=HEX;\n",
+    #         "DATA_RADIX=HEX;\n",
     #         "CONTENT\n",
     #         "BEGIN\n",
     #     ]

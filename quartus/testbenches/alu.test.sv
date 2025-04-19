@@ -29,8 +29,6 @@ module alu_test ();
       .invert_b    (invert_b)
   );
 
-
-
   initial begin
     invert_b  = 0;
     operation = control_signals::ALU_ADD;
@@ -39,7 +37,7 @@ module alu_test ();
     input_b   = 8'h5;
     repeat (1) @(posedge clk);
 
-    operation = control_signals::ALU_SHIFT_LEFT;
+    operation = control_signals::ALU_AND;
     input_a   = 8'b1100_0011;
     input_b   = 8'b1;
     repeat (1) @(posedge clk);

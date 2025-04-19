@@ -14,16 +14,25 @@ module control_unit (
 );
   typedef enum logic [31:0] {
     InstructionFetch,
+
     InstructionDecode,
+
     InstructionMem1,
     InstructionMem2,
     InstructionMem3,
     InstructionMem4,
+    InstructionMem5,
+    InstructionMem6,
+    InstructionMem7,
+    InstructionMem8,
+    InstructionMem9,
+
     InstructionExec1,
     InstructionExec2,
     InstructionExec3,
     InstructionExec4,
     InstructionExec5,
+
     InstructionInvalid,
     InstructionStateEndMarker
   } instruction_state_t;
@@ -40,152 +49,6 @@ module control_unit (
       current_instr_state <= next_instr_state;
       current_addr_mode <= next_addr_mode;
     end
-  end
-
-  always_comb begin
-    ctrl_signals = '{default: '0};
-
-    current_data_bus_input = bus_sources::DataBusSrcDataIn;
-    current_address_low_bus_input = bus_sources::AddressLowSrcPcLow;
-    current_address_high_bus_input = bus_sources::AddressHighSrcPcHigh;
-
-    next_instr_state = InstructionInvalid;
-    next_addr_mode = instruction_set::AddrModeImpl;
-    alu_op = control_signals::ALU_ADD;
-
-    case (current_instr_state)
-      InstructionFetch: begin
-        current_data_bus_input = bus_sources::DataBusSrcDataIn;
-        current_address_low_bus_input = bus_sources::AddressLowSrcPcLow;
-        current_address_high_bus_input = bus_sources::AddressHighSrcPcHigh;
-
-        next_instr_state = InstructionDecode;
-        ctrl_signals[control_signals::CtrlLoadInstReg] = 1;
-        ctrl_signals[control_signals::CtrlIncEnablePc] = 1;
-      end
-      InstructionDecode: begin
-        case (current_opcode)
-          instruction_set::OpcADC_imm:  imm_addr_mode();
-          instruction_set::OpcADC_abs:  abs_addr_mode();
-          instruction_set::OpcADC_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
-          instruction_set::OpcADC_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
-          instruction_set::OpcADC_zpg:  zpg_addr_mode();
-
-          instruction_set::OpcAND_imm:  imm_addr_mode();
-          instruction_set::OpcAND_abs:  abs_addr_mode();
-          instruction_set::OpcAND_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
-          instruction_set::OpcAND_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
-          instruction_set::OpcAND_zpg:  zpg_addr_mode();
-
-          instruction_set::OpcBCC_abs: imm_addr_mode();
-          instruction_set::OpcBCS_abs: imm_addr_mode();
-          instruction_set::OpcBEQ_abs: imm_addr_mode();
-          instruction_set::OpcBMI_abs: imm_addr_mode();
-          instruction_set::OpcBNE_abs: imm_addr_mode();
-          instruction_set::OpcBPL_abs: imm_addr_mode();
-          instruction_set::OpcBVC_abs: imm_addr_mode();
-          instruction_set::OpcBVS_abs: imm_addr_mode();
-
-          instruction_set::OpcCLC_impl: impl_addr_mode();
-
-          instruction_set::OpcCMP_imm:  imm_addr_mode();
-          instruction_set::OpcCMP_abs:  abs_addr_mode();
-          instruction_set::OpcCMP_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
-          instruction_set::OpcCMP_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
-          instruction_set::OpcCMP_zpg:  zpg_addr_mode();
-
-          instruction_set::OpcCPX_imm: imm_addr_mode();
-          instruction_set::OpcCPX_abs: abs_addr_mode();
-          instruction_set::OpcCPX_zpg: zpg_addr_mode();
-
-          instruction_set::OpcCPY_imm: imm_addr_mode();
-          instruction_set::OpcCPY_abs: abs_addr_mode();
-          instruction_set::OpcCPY_zpg: zpg_addr_mode();
-
-          instruction_set::OpcEOR_imm:  imm_addr_mode();
-          instruction_set::OpcEOR_abs:  abs_addr_mode();
-          instruction_set::OpcEOR_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
-          instruction_set::OpcEOR_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
-          instruction_set::OpcEOR_zpg:  zpg_addr_mode();
-
-          instruction_set::OpcINX_impl: impl_addr_mode();
-          instruction_set::OpcINY_impl: impl_addr_mode();
-
-          instruction_set::OpcJMP_abs: abs_addr_mode();
-
-          instruction_set::OpcLDA_imm:  imm_addr_mode();
-          instruction_set::OpcLDA_abs:  abs_addr_mode();
-          instruction_set::OpcLDA_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
-          instruction_set::OpcLDA_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
-          instruction_set::OpcLDA_zpg:  zpg_addr_mode();
-
-          instruction_set::OpcLDX_imm:  imm_addr_mode();
-          instruction_set::OpcLDX_abs:  abs_addr_mode();
-          instruction_set::OpcLDX_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
-          instruction_set::OpcLDX_zpg:  zpg_addr_mode();
-
-          instruction_set::OpcLDY_imm:  imm_addr_mode();
-          instruction_set::OpcLDY_abs:  abs_addr_mode();
-          instruction_set::OpcLDY_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
-          instruction_set::OpcLDY_zpg:  zpg_addr_mode();
-
-          instruction_set::OpcNOP_impl: next_instr_state = InstructionFetch;
-
-          instruction_set::OpcORA_imm:  imm_addr_mode();
-          instruction_set::OpcORA_abs:  abs_addr_mode();
-          instruction_set::OpcORA_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
-          instruction_set::OpcORA_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
-          instruction_set::OpcORA_zpg:  zpg_addr_mode();
-
-          instruction_set::OpcPHA_impl: impl_addr_mode();
-          instruction_set::OpcPHX_impl: impl_addr_mode();
-          instruction_set::OpcPHY_impl: impl_addr_mode();
-
-          instruction_set::OpcPLA_impl: impl_addr_mode();
-          instruction_set::OpcPLX_impl: impl_addr_mode();
-          instruction_set::OpcPLY_impl: impl_addr_mode();
-
-          instruction_set::OpcSBC_imm:  imm_addr_mode();
-          instruction_set::OpcSBC_abs:  abs_addr_mode();
-          instruction_set::OpcSBC_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
-          instruction_set::OpcSBC_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
-          instruction_set::OpcSBC_zpg:  zpg_addr_mode();
-
-          instruction_set::OpcSEC_impl: impl_addr_mode();
-
-          instruction_set::OpcSTA_abs:  abs_addr_mode();
-          instruction_set::OpcSTA_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
-          instruction_set::OpcSTA_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
-          instruction_set::OpcSTA_zpg:  zpg_addr_mode();
-
-          instruction_set::OpcSTX_abs: abs_addr_mode();
-          instruction_set::OpcSTX_zpg: zpg_addr_mode();
-
-          instruction_set::OpcSTY_abs: abs_addr_mode();
-          instruction_set::OpcSTY_zpg: zpg_addr_mode();
-
-          instruction_set::OpcTAX_impl: impl_addr_mode();
-          instruction_set::OpcTAY_impl: impl_addr_mode();
-          instruction_set::OpcTSX_impl: impl_addr_mode();
-          instruction_set::OpcTXA_impl: impl_addr_mode();
-          instruction_set::OpcTXS_impl: impl_addr_mode();
-          instruction_set::OpcTYA_impl: impl_addr_mode();
-
-          default: next_addr_mode = instruction_set::AddrModeImpl;
-        endcase
-      end
-      default: begin
-        case (current_addr_mode)
-          instruction_set::AddrModeImm: imm_addr_mode();
-          instruction_set::AddrModeAbs: abs_addr_mode();
-          instruction_set::AddrModeAbsX: absx_addr_mode(bus_sources::DataBusSrcRegX);
-          instruction_set::AddrModeAbsY: absx_addr_mode(bus_sources::DataBusSrcRegY);
-          instruction_set::AddrModeImpl: impl_addr_mode();
-          instruction_set::AddrModeZpg: zpg_addr_mode();
-          default: invalid_state();
-        endcase
-      end
-    endcase
   end
 
   // -----------------------------------------------------
@@ -286,6 +149,116 @@ module control_unit (
     endcase
   endtask
 
+  task ind_addr_mode();
+    next_addr_mode = instruction_set::AddrModeInd;
+    case (current_instr_state)
+      InstructionDecode: begin
+        next_instr_state = InstructionMem1;
+        ctrl_signals[control_signals::CtrlIncEnablePc] = 1;
+        ctrl_signals[control_signals::CtrlLoadAddrLow] = 1;
+      end
+      InstructionMem1: begin
+        next_instr_state = InstructionMem2;
+        ctrl_signals[control_signals::CtrlIncEnablePc] = 1;
+        ctrl_signals[control_signals::CtrlLoadAddrHigh] = 1;
+      end
+      InstructionMem2: begin
+        next_instr_state = InstructionMem3;
+
+        current_address_low_bus_input = bus_sources::AddressLowSrcAddrLowReg;
+        current_address_high_bus_input = bus_sources::AddressHighSrcAddrHighReg;
+
+        ctrl_signals[control_signals::CtrlLoadPc] = 1;
+        ctrl_signals[control_signals::CtrlLoadAddrLow] = 1;
+      end
+      InstructionMem3: begin
+        next_instr_state = InstructionMem4;
+
+        ctrl_signals[control_signals::CtrlIncEnablePc] = 1;
+      end
+      InstructionMem4: begin
+        next_instr_state = InstructionExec1;
+        ctrl_signals[control_signals::CtrlIncEnablePc] = 0;
+        ctrl_signals[control_signals::CtrlLoadAddrHigh] = 1;
+      end
+      default: begin
+        current_address_low_bus_input  = bus_sources::AddressLowSrcAddrLowReg;
+        current_address_high_bus_input = bus_sources::AddressHighSrcAddrHighReg;
+        opcode_exec();
+      end
+    endcase
+  endtask
+
+  task indx_addr_mode();
+    next_addr_mode = instruction_set::AddrModeIndX;
+    case (current_instr_state)
+      InstructionDecode: begin
+        next_instr_state = InstructionMem1;
+
+        current_data_bus_input = bus_sources::DataBusSrcRegX;
+
+        ctrl_signals[control_signals::CtrlLoadInputA] = 1;
+        ctrl_signals[control_signals::CtrlClearFlagCarry] = 1;
+      end
+      InstructionMem1: begin
+        next_instr_state = InstructionMem2;
+
+        current_data_bus_input = bus_sources::DataBusSrcZero;
+
+        ctrl_signals[control_signals::CtrlLoadInputB] = 1;
+        ctrl_signals[control_signals::CtrlIncEnablePc] = 1;
+
+        alu_op = control_signals::ALU_ADD;
+      end
+      InstructionMem2: begin
+        next_instr_state = InstructionMem3;
+
+        current_data_bus_input = bus_sources::DataBusSrcRegAluResult;
+
+        ctrl_signals[control_signals::CtrlUpdateFlagCarry] = 1;
+        ctrl_signals[control_signals::CtrlLoadAddrLow] = 1;
+      end
+      InstructionMem3: begin
+        if (status_flags[control_signals::StatusFlagCarry]) begin
+          next_instr_state = InstructionMem4;
+        end else begin
+          next_instr_state = InstructionMem5;
+        end
+        current_data_bus_input = bus_sources::DataBusSrcDataIn;
+        ctrl_signals[control_signals::CtrlIncEnablePc] = 1;
+        ctrl_signals[control_signals::CtrlLoadAddrHigh] = 1;
+      end
+      InstructionMem4: begin
+        next_instr_state = InstructionExec5;
+        ctrl_signals[control_signals::CtrlIncAddressHighReg] = 1;
+      end
+      InstructionMem5: begin
+        next_instr_state = InstructionMem6;
+
+        current_address_low_bus_input = bus_sources::AddressLowSrcAddrLowReg;
+        current_address_high_bus_input = bus_sources::AddressHighSrcAddrHighReg;
+
+        ctrl_signals[control_signals::CtrlLoadPc] = 1;
+        ctrl_signals[control_signals::CtrlLoadAddrLow] = 1;
+      end
+      InstructionMem6: begin
+        next_instr_state = InstructionMem7;
+
+        ctrl_signals[control_signals::CtrlIncEnablePc] = 1;
+      end
+      InstructionMem7: begin
+        next_instr_state = InstructionExec1;
+        ctrl_signals[control_signals::CtrlIncEnablePc] = 0;
+        ctrl_signals[control_signals::CtrlLoadAddrHigh] = 1;
+      end
+      default: begin
+        current_address_low_bus_input  = bus_sources::AddressLowSrcAddrLowReg;
+        current_address_high_bus_input = bus_sources::AddressHighSrcZero;
+        opcode_exec();
+      end
+    endcase
+  endtask
+
   task zpg_addr_mode();
     next_addr_mode = instruction_set::AddrModeZpg;
     case (current_instr_state)
@@ -307,14 +280,14 @@ module control_unit (
     case (current_instr_state)
       InstructionDecode: begin
         next_instr_state = InstructionMem1;
-        current_data_bus_input = idx_reg;
+        current_data_bus_input = bus_sources::DataBusSrcDataIn;
         ctrl_signals[control_signals::CtrlLoadInputA] = 1;
         ctrl_signals[control_signals::CtrlClearFlagCarry] = 1;
       end
       InstructionMem1: begin
         next_instr_state = InstructionMem2;
 
-        current_data_bus_input = bus_sources::DataBusSrcZero;
+        current_data_bus_input = idx_reg;
 
         ctrl_signals[control_signals::CtrlLoadInputB] = 1;
         ctrl_signals[control_signals::CtrlIncEnablePc] = 1;
@@ -322,27 +295,13 @@ module control_unit (
         alu_op = control_signals::ALU_ADD;
       end
       InstructionMem2: begin
-        next_instr_state = InstructionMem3;
+        next_instr_state = InstructionExec1;
 
         current_data_bus_input = bus_sources::DataBusSrcRegAluResult;
 
         ctrl_signals[control_signals::CtrlUpdateFlagCarry] = 1;
 
         ctrl_signals[control_signals::CtrlLoadAddrLow] = 1;
-      end
-      InstructionMem3: begin
-        if (status_flags[control_signals::StatusFlagCarry]) begin
-          next_instr_state = InstructionMem4;
-        end else begin
-          next_instr_state = InstructionExec1;
-        end
-        current_data_bus_input = bus_sources::DataBusSrcDataIn;
-        ctrl_signals[control_signals::CtrlIncEnablePc] = 1;
-        ctrl_signals[control_signals::CtrlLoadAddrHigh] = 1;
-      end
-      InstructionMem4: begin
-        next_instr_state = InstructionExec1;
-        ctrl_signals[control_signals::CtrlIncAddressHighReg] = 1;
       end
       default: begin
         current_address_low_bus_input  = bus_sources::AddressLowSrcAddrLowReg;
@@ -358,6 +317,163 @@ module control_unit (
     next_addr_mode   = instruction_set::AddrModeImpl;
   endtask
 
+  always_comb begin
+    ctrl_signals = '{default: '0};
+
+    current_data_bus_input = bus_sources::DataBusSrcDataIn;
+    current_address_low_bus_input = bus_sources::AddressLowSrcPcLow;
+    current_address_high_bus_input = bus_sources::AddressHighSrcPcHigh;
+
+    next_instr_state = InstructionInvalid;
+    next_addr_mode = instruction_set::AddrModeImpl;
+    alu_op = control_signals::ALU_ADD;
+
+    case (current_instr_state)
+      InstructionFetch: begin
+        current_data_bus_input = bus_sources::DataBusSrcDataIn;
+        current_address_low_bus_input = bus_sources::AddressLowSrcPcLow;
+        current_address_high_bus_input = bus_sources::AddressHighSrcPcHigh;
+
+        next_instr_state = InstructionDecode;
+        ctrl_signals[control_signals::CtrlLoadInstReg] = 1;
+        ctrl_signals[control_signals::CtrlIncEnablePc] = 1;
+      end
+      InstructionDecode: begin
+        case (current_opcode)
+          instruction_set::OpcADC_imm:  imm_addr_mode();
+          instruction_set::OpcADC_abs:  abs_addr_mode();
+          instruction_set::OpcADC_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
+          instruction_set::OpcADC_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
+          instruction_set::OpcADC_indx: indx_addr_mode();
+          instruction_set::OpcADC_zpg:  zpg_addr_mode();
+
+          instruction_set::OpcAND_imm:  imm_addr_mode();
+          instruction_set::OpcAND_abs:  abs_addr_mode();
+          instruction_set::OpcAND_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
+          instruction_set::OpcAND_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
+          instruction_set::OpcAND_zpg:  zpg_addr_mode();
+
+          instruction_set::OpcBCC_abs: imm_addr_mode();
+          instruction_set::OpcBCS_abs: imm_addr_mode();
+          instruction_set::OpcBEQ_abs: imm_addr_mode();
+          instruction_set::OpcBMI_abs: imm_addr_mode();
+          instruction_set::OpcBNE_abs: imm_addr_mode();
+          instruction_set::OpcBPL_abs: imm_addr_mode();
+          instruction_set::OpcBVC_abs: imm_addr_mode();
+          instruction_set::OpcBVS_abs: imm_addr_mode();
+
+          instruction_set::OpcCLC_impl: impl_addr_mode();
+
+          instruction_set::OpcCMP_imm:  imm_addr_mode();
+          instruction_set::OpcCMP_abs:  abs_addr_mode();
+          instruction_set::OpcCMP_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
+          instruction_set::OpcCMP_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
+          instruction_set::OpcCMP_zpg:  zpg_addr_mode();
+
+          instruction_set::OpcCPX_imm: imm_addr_mode();
+          instruction_set::OpcCPX_abs: abs_addr_mode();
+          instruction_set::OpcCPX_zpg: zpg_addr_mode();
+
+          instruction_set::OpcCPY_imm: imm_addr_mode();
+          instruction_set::OpcCPY_abs: abs_addr_mode();
+          instruction_set::OpcCPY_zpg: zpg_addr_mode();
+
+          instruction_set::OpcEOR_imm:  imm_addr_mode();
+          instruction_set::OpcEOR_abs:  abs_addr_mode();
+          instruction_set::OpcEOR_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
+          instruction_set::OpcEOR_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
+          instruction_set::OpcEOR_zpg:  zpg_addr_mode();
+
+          instruction_set::OpcINX_impl: impl_addr_mode();
+          instruction_set::OpcINY_impl: impl_addr_mode();
+
+          instruction_set::OpcJMP_abs: abs_addr_mode();
+          instruction_set::OpcJMP_ind: ind_addr_mode();
+
+          instruction_set::OpcJSR_abs: abs_addr_mode();
+
+          instruction_set::OpcLDA_imm:  imm_addr_mode();
+          instruction_set::OpcLDA_abs:  abs_addr_mode();
+          instruction_set::OpcLDA_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
+          instruction_set::OpcLDA_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
+          instruction_set::OpcLDA_zpg:  zpg_addr_mode();
+          instruction_set::OpcLDA_zpgx: zpgx_addr_mode(bus_sources::DataBusSrcRegX);
+
+          instruction_set::OpcLDX_imm:  imm_addr_mode();
+          instruction_set::OpcLDX_abs:  abs_addr_mode();
+          instruction_set::OpcLDX_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
+          instruction_set::OpcLDX_zpg:  zpg_addr_mode();
+
+          instruction_set::OpcLDY_imm:  imm_addr_mode();
+          instruction_set::OpcLDY_abs:  abs_addr_mode();
+          instruction_set::OpcLDY_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
+          instruction_set::OpcLDY_zpg:  zpg_addr_mode();
+
+          instruction_set::OpcNOP_impl: next_instr_state = InstructionFetch;
+
+          instruction_set::OpcORA_imm:  imm_addr_mode();
+          instruction_set::OpcORA_abs:  abs_addr_mode();
+          instruction_set::OpcORA_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
+          instruction_set::OpcORA_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
+          instruction_set::OpcORA_zpg:  zpg_addr_mode();
+
+          instruction_set::OpcPHA_impl: impl_addr_mode();
+          instruction_set::OpcPHX_impl: impl_addr_mode();
+          instruction_set::OpcPHY_impl: impl_addr_mode();
+
+          instruction_set::OpcPLA_impl: impl_addr_mode();
+          instruction_set::OpcPLX_impl: impl_addr_mode();
+          instruction_set::OpcPLY_impl: impl_addr_mode();
+
+          instruction_set::OpcRTS_impl: impl_addr_mode();
+
+          instruction_set::OpcSBC_imm:  imm_addr_mode();
+          instruction_set::OpcSBC_abs:  abs_addr_mode();
+          instruction_set::OpcSBC_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
+          instruction_set::OpcSBC_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
+          instruction_set::OpcSBC_zpg:  zpg_addr_mode();
+
+          instruction_set::OpcSEC_impl: impl_addr_mode();
+
+          instruction_set::OpcSTA_abs:  abs_addr_mode();
+          instruction_set::OpcSTA_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
+          instruction_set::OpcSTA_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
+          instruction_set::OpcSTA_zpg:  zpg_addr_mode();
+          instruction_set::OpcSTA_zpgx: zpgx_addr_mode(bus_sources::DataBusSrcRegX);
+
+          instruction_set::OpcSTX_abs: abs_addr_mode();
+          instruction_set::OpcSTX_zpg: zpg_addr_mode();
+
+          instruction_set::OpcSTY_abs: abs_addr_mode();
+          instruction_set::OpcSTY_zpg: zpg_addr_mode();
+
+          instruction_set::OpcTAX_impl: impl_addr_mode();
+          instruction_set::OpcTAY_impl: impl_addr_mode();
+          instruction_set::OpcTSX_impl: impl_addr_mode();
+          instruction_set::OpcTXA_impl: impl_addr_mode();
+          instruction_set::OpcTXS_impl: impl_addr_mode();
+          instruction_set::OpcTYA_impl: impl_addr_mode();
+
+          default: next_addr_mode = instruction_set::AddrModeImpl;
+        endcase
+      end
+      default: begin
+        case (current_addr_mode)
+          instruction_set::AddrModeImm: imm_addr_mode();
+          instruction_set::AddrModeAbs: abs_addr_mode();
+          instruction_set::AddrModeAbsX: absx_addr_mode(bus_sources::DataBusSrcRegX);
+          instruction_set::AddrModeAbsY: absx_addr_mode(bus_sources::DataBusSrcRegY);
+          instruction_set::AddrModeInd: ind_addr_mode();
+          instruction_set::AddrModeIndX: indx_addr_mode();
+          instruction_set::AddrModeImpl: impl_addr_mode();
+          instruction_set::AddrModeZpg: zpg_addr_mode();
+          instruction_set::AddrModeZpgX: zpgx_addr_mode(bus_sources::DataBusSrcRegX);
+          default: invalid_state();
+        endcase
+      end
+    endcase
+  end
+
   // --------------------------------------------------------
   // ---------- Opcode execution system tasks ---------------
   // --------------------------------------------------------
@@ -367,6 +483,7 @@ module control_unit (
       instruction_set::OpcADC_abs:  exec_arithmetic_op(control_signals::ALU_ADD);
       instruction_set::OpcADC_absx: exec_arithmetic_op(control_signals::ALU_ADD);
       instruction_set::OpcADC_absy: exec_arithmetic_op(control_signals::ALU_ADD);
+      instruction_set::OpcADC_indx: exec_arithmetic_op(control_signals::ALU_ADD);
       instruction_set::OpcADC_zpg:  exec_arithmetic_op(control_signals::ALU_ADD);
 
       instruction_set::OpcAND_imm:  exec_logic_op(control_signals::ALU_AND);
@@ -411,12 +528,16 @@ module control_unit (
       instruction_set::OpcINY_impl: exec_iny();
 
       instruction_set::OpcJMP_abs: exec_jmp();
+      instruction_set::OpcJMP_ind: exec_jmp();
+
+      instruction_set::OpcJSR_abs: exec_jsr();
 
       instruction_set::OpcLDA_imm:  exec_lda();
       instruction_set::OpcLDA_abs:  exec_lda();
       instruction_set::OpcLDA_absx: exec_lda();
       instruction_set::OpcLDA_absy: exec_lda();
       instruction_set::OpcLDA_zpg:  exec_lda();
+      instruction_set::OpcLDA_zpgx: exec_lda();
 
       instruction_set::OpcLDX_imm:  exec_ldx();
       instruction_set::OpcLDX_abs:  exec_ldx();
@@ -442,6 +563,8 @@ module control_unit (
       instruction_set::OpcPLA_impl: exec_pla(control_signals::CtrlLoadX);
       instruction_set::OpcPLA_impl: exec_pla(control_signals::CtrlLoadY);
 
+      instruction_set::OpcRTS_impl: exec_rts();
+
       instruction_set::OpcSBC_imm:  exec_arithmetic_op(control_signals::ALU_ADD, 1);
       instruction_set::OpcSBC_abs:  exec_arithmetic_op(control_signals::ALU_ADD, 1);
       instruction_set::OpcSBC_absx: exec_arithmetic_op(control_signals::ALU_ADD, 1);
@@ -454,6 +577,7 @@ module control_unit (
       instruction_set::OpcSTA_absx: exec_sta();
       instruction_set::OpcSTA_absy: exec_sta();
       instruction_set::OpcSTA_zpg:  exec_sta();
+      instruction_set::OpcSTA_zpgx: exec_sta();
 
       instruction_set::OpcSTX_abs: exec_stx();
       instruction_set::OpcSTX_zpg: exec_stx();
@@ -686,10 +810,46 @@ module control_unit (
     case (current_instr_state)
       InstructionExec1: begin
         next_instr_state = InstructionFetch;
+
         ctrl_signals[control_signals::CtrlIncEnablePc] = 0;
         ctrl_signals[control_signals::CtrlLoadPc] = 1;
       end
       default: invalid_state();
+    endcase
+  endtask
+
+  task exec_jsr();
+    case (current_instr_state)
+      InstructionExec1: begin
+        next_instr_state = InstructionExec2;
+
+        current_address_high_bus_input = bus_sources::AddressHighSrcStackPointer;
+        current_address_low_bus_input = bus_sources::AddressLowSrcStackPointer;
+
+        current_data_bus_input = bus_sources::DataBusSrcPCHigh;
+
+        ctrl_signals[control_signals::CtrlRead0Write1] = 1;
+        ctrl_signals[control_signals::CtrlDecStackPointer] = 1;
+        ctrl_signals[control_signals::CtrlIncEnablePc] = 0;
+      end
+      InstructionExec2: begin
+        next_instr_state = InstructionExec3;
+
+        current_address_high_bus_input = bus_sources::AddressHighSrcStackPointer;
+        current_address_low_bus_input = bus_sources::AddressLowSrcStackPointer;
+
+        current_data_bus_input = bus_sources::DataBusSrcPCLow;
+
+        ctrl_signals[control_signals::CtrlRead0Write1] = 1;
+        ctrl_signals[control_signals::CtrlDecStackPointer] = 1;
+        ctrl_signals[control_signals::CtrlIncEnablePc] = 0;
+      end
+      InstructionExec3: begin
+        next_instr_state = InstructionFetch;
+
+        ctrl_signals[control_signals::CtrlIncEnablePc] = 0;
+        ctrl_signals[control_signals::CtrlLoadPc] = 1;
+      end
     endcase
   endtask
 
@@ -750,7 +910,7 @@ module control_unit (
     case (current_instr_state)
       InstructionExec1: begin
         next_instr_state = InstructionExec2;
-        ctrl_signals[control_signals::CtrlRead0Write1] = 1;
+        // ctrl_signals[control_signals::CtrlRead0Write1] = 1;
         ctrl_signals[control_signals::CtrlIncStackPointer] = 1;
       end
       InstructionExec2: begin
@@ -758,8 +918,45 @@ module control_unit (
         current_data_bus_input = bus_sources::DataBusSrcDataIn;
         current_address_low_bus_input = bus_sources::AddressLowSrcStackPointer;
         current_address_high_bus_input = bus_sources::AddressHighSrcStackPointer;
-        ctrl_signals[control_signals::CtrlDecStackPointer] = 1;
         ctrl_signals[pull_src] = 1;
+      end
+      default: invalid_state();
+    endcase
+  endtask
+
+  task exec_rts();
+    case (current_instr_state)
+      InstructionExec1: begin
+        next_instr_state = InstructionExec2;
+        ctrl_signals[control_signals::CtrlIncStackPointer] = 1;
+      end
+      InstructionExec2: begin
+        next_instr_state = InstructionExec3;
+
+        current_data_bus_input = bus_sources::DataBusSrcDataIn;
+        current_address_low_bus_input = bus_sources::AddressLowSrcStackPointer;
+        current_address_high_bus_input = bus_sources::AddressHighSrcStackPointer;
+
+        ctrl_signals[control_signals::CtrlIncStackPointer] = 1;
+        ctrl_signals[control_signals::CtrlLoadAddrLow] = 1;
+      end
+      InstructionExec3: begin
+        next_instr_state = InstructionExec4;
+
+        current_data_bus_input = bus_sources::DataBusSrcDataIn;
+        current_address_low_bus_input = bus_sources::AddressLowSrcStackPointer;
+        current_address_high_bus_input = bus_sources::AddressHighSrcStackPointer;
+
+        ctrl_signals[control_signals::CtrlLoadAddrHigh] = 1;
+      end
+      InstructionExec4: begin
+        next_instr_state = InstructionFetch;
+
+        current_address_low_bus_input = bus_sources::AddressLowSrcAddrLowReg;
+        current_address_high_bus_input = bus_sources::AddressHighSrcAddrHighReg;
+
+        ctrl_signals[control_signals::CtrlIncEnablePc] = 0;
+        ctrl_signals[control_signals::CtrlLoadPc] = 1;
       end
       default: invalid_state();
     endcase
@@ -840,7 +1037,5 @@ module control_unit (
       end
     endcase
   endtask
-
-
 
 endmodule

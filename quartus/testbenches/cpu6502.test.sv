@@ -20,7 +20,9 @@ module cpu6502_test ();
   logic [7:0] ram_out;
   logic ram_cs;
   assign ram_cs = address_out < 16'h800;
-  async_ram ram (
+  async_ram #(
+      .depth(11)
+  ) ram (
       .address (address_out[11:0]),
       .data_in (data_out_cpu),
       .data_out(ram_out),
@@ -34,7 +36,7 @@ module cpu6502_test ();
   assign rom_cs = address_out >= 16'h8000;
   rom #(
       .init_file("rom.hex"),
-      .depth(10)
+      .depth(15)
   ) prg_rom (
       .address (address_out[14:0]),
       .data_out(rom_out),
@@ -70,7 +72,7 @@ module cpu6502_test ();
   end
   initial begin
     reset = 1;
-    port_b_in = 8'h6;
+    port_b_in = 8'hff;
 
     repeat (1) @(posedge clk);
     reset = 0;

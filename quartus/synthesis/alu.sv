@@ -42,7 +42,7 @@ module alu (
         result = (input_a << 1) + carry_in;
       end
       default: begin
-        result = 8'b0;
+        result = 8'bx;
       end
     endcase
   end

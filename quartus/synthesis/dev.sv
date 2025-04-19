@@ -1,5 +1,4 @@
 module dev (
-
     //////////// CLOCK //////////
     input         CLOCK_50,
     // input CLOCK2_50,
@@ -8,7 +7,7 @@ module dev (
     output [ 0:6] HEX0,
     output [ 0:6] HEX1,
     output [ 0:6] HEX2,
-    output [ 6:0] HEX3,
+    output [ 0:6] HEX3,
     output [ 0:6] HEX4,
     output [ 0:6] HEX5,
     output [ 0:6] HEX6,
@@ -137,6 +136,7 @@ module dev (
   assign LEDR = ~SW[1] ? {address_out, 2'b0} : {port_a_out, 2'b0, port_b_out};
 
   assign HEX3 = 7'hff;
+
   // assign LCD_EN = port_a_out[7];
   // assign LCD_RW = port_a_out[6];
   // assign LCD_RS = port_a_out[5];

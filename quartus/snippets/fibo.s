@@ -30,7 +30,7 @@ restart:
   sta N2
   sta R
 loop:
-  ; Esse loop continua executando enquando (R - PORTB) > 0
+  ; Esse loop continua executando enquanto (R - PORTB) > 0
   ; Do contrário ele pula de volta para restart, para recalcular a sequência
   lda R
   cmp PORTB

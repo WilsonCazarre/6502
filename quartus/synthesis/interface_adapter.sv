@@ -26,7 +26,6 @@ module interface_adapter (
     // input logic readb_write
 );
 
-
   typedef enum logic [3:0] {
     IDLE,
     READ_PORT_A,

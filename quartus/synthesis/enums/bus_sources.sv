@@ -14,6 +14,9 @@ package bus_sources;
     DataBusSrcAddrLowBus,
     DataBusSrcAddrHighBus,
 
+    DataBusSrcPCHigh,
+    DataBusSrcPCLow,
+
     DataBusSrcEndMarker
   } data_bus_source_t;
 

@@ -52,6 +52,9 @@ module cpu6502 (
   assign data_bus_inputs[bus_sources::DataBusSrcAddrLowBus] = address_low_bus;
   assign data_bus_inputs[bus_sources::DataBusSrcAddrHighBus] = address_high_bus;
 
+  assign data_bus_inputs[bus_sources::DataBusSrcPCHigh] = address_high_bus_inputs[bus_sources::AddressHighSrcPcHigh];
+  assign data_bus_inputs[bus_sources::DataBusSrcPCLow] = address_low_bus_inputs[bus_sources::AddressLowSrcPcLow];
+
   assign address_low_bus_inputs[bus_sources::AddressLowSrcDataBus] = data_bus;
   assign address_high_bus_inputs[bus_sources::AddressHighSrcDataBus] = data_bus;
 
@@ -69,7 +72,7 @@ module cpu6502 (
       .inc(1'b0),
       .dec(1'b0)
   );
-  
+
   register RegX (
       .data_in(data_bus),
       .data_out(data_bus_inputs[bus_sources::DataBusSrcRegX]),

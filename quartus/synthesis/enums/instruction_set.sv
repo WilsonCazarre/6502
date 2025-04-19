@@ -1,11 +1,12 @@
 package instruction_set;
 
   typedef enum logic [7:0] {
-    // 86/149
+    // 89/149
     OpcADC_imm  = 8'h69,
     OpcADC_abs  = 8'h6d,
     OpcADC_absx = 8'h7d,
     OpcADC_absy = 8'h79,
+    OpcADC_indx = 8'h61,
     OpcADC_zpg  = 8'h65,
 
     OpcAND_imm  = 8'h29,
@@ -50,12 +51,16 @@ package instruction_set;
     OpcINY_impl = 8'hc8,
 
     OpcJMP_abs = 8'h4c,
+    OpcJMP_ind = 8'h6c,
+
+    OpcJSR_abs = 8'h20,
 
     OpcLDA_imm  = 8'ha9,
     OpcLDA_abs  = 8'had,
     OpcLDA_absx = 8'hbd,
     OpcLDA_absy = 8'hb9,
     OpcLDA_zpg  = 8'ha5,
+    OpcLDA_zpgx = 8'hb5,
 
     OpcLDX_imm  = 8'ha2,
     OpcLDX_abs  = 8'hae,
@@ -83,6 +88,8 @@ package instruction_set;
     OpcPLX_impl = 8'hfa,
     OpcPLY_impl = 8'h7a,
 
+    OpcRTS_impl = 8'h60,
+
     OpcSBC_imm  = 8'he9,
     OpcSBC_abs  = 8'hed,
     OpcSBC_absx = 8'hfd,
@@ -95,6 +102,7 @@ package instruction_set;
     OpcSTA_absx = 8'h9d,
     OpcSTA_absy = 8'h99,
     OpcSTA_zpg  = 8'h85,
+    OpcSTA_zpgx = 8'h95,
 
     OpcSTX_abs = 8'h8e,
     OpcSTX_zpg = 8'h86,
@@ -115,6 +123,8 @@ package instruction_set;
     AddrModeAbs,
     AddrModeAbsX,
     AddrModeAbsY,
+    AddrModeInd,
+    AddrModeIndX,
     AddrModeStack,
     AddrModeImpl,
     AddrModeZpg,
