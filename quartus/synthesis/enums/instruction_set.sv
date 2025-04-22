@@ -1,7 +1,7 @@
 package instruction_set;
 
   typedef enum logic [7:0] {
-    // 89/149
+    // 93/149
     OpcADC_imm  = 8'h69,
     OpcADC_abs  = 8'h6d,
     OpcADC_absx = 8'h7d,
@@ -27,6 +27,7 @@ package instruction_set;
     OpcBRK_impl = 8'h00,
 
     OpcCLC_impl = 8'h18,
+    OpcCLI_impl = 8'h58,
 
     OpcCMP_imm  = 8'hc9,
     OpcCMP_abs  = 8'hcd,
@@ -100,6 +101,7 @@ package instruction_set;
     OpcSBC_zpg  = 8'he5,
 
     OpcSEC_impl = 8'h38,
+    OpcSEI_impl = 8'h78,
 
     OpcSTA_abs  = 8'h8d,
     OpcSTA_absx = 8'h9d,

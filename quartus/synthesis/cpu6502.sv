@@ -3,6 +3,7 @@ module cpu6502 (
     input logic clk_in,
     output logic READ_write,
     input logic nmib,
+    input logic irqb,
     input logic [7:0] data_in,
     output logic [7:0] data_out,
     output logic [15:0] address_out
@@ -152,7 +153,7 @@ module cpu6502 (
   );
 
   logic status_flags[8];
-  logic flag_carry, flag_zero, flag_negative, flag_overflow;
+  logic flag_carry, flag_zero, flag_negative, flag_overflow, flag_interrupt_disable;
 
   alu alu (
       .carry_in(ctrl_signals[control_signals::CtrlAluCarryIn]),
@@ -190,37 +191,52 @@ module cpu6502 (
   assign status_flags[control_signals::StatusFlagIgnored] = 0;
   assign status_flags[control_signals::StatusFlagBreak] = 0;
   assign status_flags[control_signals::StatusFlagDecimal] = 0;
-  assign status_flags[control_signals::StatusFlagInterrupt] = 0;
+  assign status_flags[control_signals::StatusFlagInterruptDisable] = flag_interrupt_disable;
   assign status_flags[control_signals::StatusFlagZero] = flag_zero;
   assign status_flags[control_signals::StatusFlagCarry] = flag_carry;
-  assign data_bus_inputs[bus_sources::DataBusSrcStatusRegister] = '{
-          status_flags[0],
-          status_flags[1],
-          status_flags[2],
-          status_flags[3],
-          status_flags[4],
-          status_flags[5],
-          status_flags[6],
-          status_flags[7]
-      };
+
+  assign data_bus_inputs[bus_sources::DataBusSrcStatusRegister][control_signals::StatusFlagNegative] = 
+    status_flags[control_signals::StatusFlagNegative];
+  assign data_bus_inputs[bus_sources::DataBusSrcStatusRegister][control_signals::StatusFlagOverflow] = 
+    status_flags[control_signals::StatusFlagOverflow];
+  assign data_bus_inputs[bus_sources::DataBusSrcStatusRegister][control_signals::StatusFlagIgnored] = 
+    status_flags[control_signals::StatusFlagIgnored];
+  assign data_bus_inputs[bus_sources::DataBusSrcStatusRegister][control_signals::StatusFlagBreak] = 
+    status_flags[control_signals::StatusFlagBreak];
+  assign data_bus_inputs[bus_sources::DataBusSrcStatusRegister][control_signals::StatusFlagDecimal] = 
+    status_flags[control_signals::StatusFlagDecimal];
+  assign data_bus_inputs[bus_sources::DataBusSrcStatusRegister][control_signals::StatusFlagInterruptDisable] = 
+    status_flags[control_signals::StatusFlagInterruptDisable];
+  assign data_bus_inputs[bus_sources::DataBusSrcStatusRegister][control_signals::StatusFlagZero] = 
+    status_flags[control_signals::StatusFlagZero];
+  assign data_bus_inputs[bus_sources::DataBusSrcStatusRegister][control_signals::StatusFlagCarry] = 
+    status_flags[control_signals::StatusFlagCarry];
+
+
   status_register status_register (
-      .data_in        (data_bus),
-      .update_zero    (ctrl_signals[control_signals::CtrlUpdateFlagZero]),
-      .update_negative(ctrl_signals[control_signals::CtrlUpdateFlagNegative]),
-      .update_carry   (ctrl_signals[control_signals::CtrlUpdateFlagCarry]),
-      .update_overflow(ctrl_signals[control_signals::CtrlUpdateFlagOverflow]),
-      .set_carry      (ctrl_signals[control_signals::CtrlSetFlagCarry]),
-      .set_overflow   (ctrl_signals[control_signals::CtrlSetFlagOverflow]),
-      .clear_carry    (ctrl_signals[control_signals::CtrlClearFlagCarry]),
-      .clear_overflow (ctrl_signals[control_signals::CtrlClearFlagOverflow]),
-      .clk            (clk_in),
-      .reset          (reset),
-      .carry_in       (alu_carry),
-      .overflow_in    (alu_overflow),
-      .flag_carry     (flag_carry),
-      .flag_zero      (flag_zero),
-      .flag_negative  (flag_negative),
-      .flag_overflow  (flag_overflow)
+      .data_in(data_bus),
+
+      .update_zero            (ctrl_signals[control_signals::CtrlUpdateFlagZero]),
+      .update_negative        (ctrl_signals[control_signals::CtrlUpdateFlagNegative]),
+      .update_carry           (ctrl_signals[control_signals::CtrlUpdateFlagCarry]),
+      .update_overflow        (ctrl_signals[control_signals::CtrlUpdateFlagOverflow]),
+      .set_carry              (ctrl_signals[control_signals::CtrlSetFlagCarry]),
+      .set_overflow           (ctrl_signals[control_signals::CtrlSetFlagOverflow]),
+      .clear_carry            (ctrl_signals[control_signals::CtrlClearFlagCarry]),
+      .clear_overflow         (ctrl_signals[control_signals::CtrlClearFlagOverflow]),
+      .set_interrupt_disable  (ctrl_signals[control_signals::CtrlSetInterruptDisable]),
+      .clear_interrupt_disable(ctrl_signals[control_signals::CtrlClearInterruptDisable]),
+
+      .clk        (clk_in),
+      .reset      (reset),
+      .carry_in   (alu_carry),
+      .overflow_in(alu_overflow),
+
+      .flag_carry            (flag_carry),
+      .flag_zero             (flag_zero),
+      .flag_negative         (flag_negative),
+      .flag_overflow         (flag_overflow),
+      .flag_interrupt_disable(flag_interrupt_disable)
   );
 
 
@@ -250,7 +266,8 @@ module cpu6502 (
       .current_address_high_bus_input(current_address_high_bus_input),
       .clk                           (clk_in),
       .reset                         (reset),
-      .nmib                          (nmib)
+      .nmib                          (nmib),
+      .irqb                          (irqb)
   );
 
 

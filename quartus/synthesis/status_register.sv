@@ -10,6 +10,8 @@ module status_register (
     input wire clear_carry,
     input wire set_overflow,
     input wire clear_overflow,
+    input wire set_interrupt_disable,
+    input wire clear_interrupt_disable,
 
     input wire clk,
     input wire reset,
@@ -20,7 +22,8 @@ module status_register (
     output logic flag_carry,
     output logic flag_zero,
     output logic flag_negative,
-    output logic flag_overflow
+    output logic flag_overflow,
+    output logic flag_interrupt_disable
 );
 
   always_ff @(posedge clk) begin
@@ -29,6 +32,7 @@ module status_register (
       flag_zero <= 0;
       flag_negative <= 0;
       flag_overflow <= 0;
+      flag_interrupt_disable <= 0;
     end else begin
       if (set_carry) begin
         flag_carry <= 1;
@@ -50,8 +54,18 @@ module status_register (
         flag_overflow <= flag_overflow;
       end
 
+
+      if (set_interrupt_disable) begin
+        flag_interrupt_disable <= 1;
+      end else if (clear_interrupt_disable) begin
+        flag_interrupt_disable <= 0;
+      end else begin
+        flag_interrupt_disable <= flag_interrupt_disable;
+      end
       flag_zero <= update_zero ? ~|data_in : flag_zero;
       flag_negative <= update_negative ? data_in[7] : flag_negative;
+
+
     end
   end
 

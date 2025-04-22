@@ -20,7 +20,7 @@ module program_counter (
   always @(posedge clk) begin
 
     if (reset) begin
-      current_pc <= 16'h8000;
+      current_pc <= 16'h0;
     end else if (load) begin
       current_pc <= {PCH_in, PCL_in};
     end else begin

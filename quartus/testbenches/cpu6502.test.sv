@@ -4,7 +4,7 @@ module cpu6502_test ();
   always #10 clk = ~clk;
 
   logic reset;
-  logic nmib;
+  logic nmib, irqb;
   logic READ_write;
   logic [7:0] data_in_cpu, data_out_cpu;
   logic [15:0] address_out;
@@ -75,6 +75,7 @@ module cpu6502_test ();
   initial begin
     reset = 1;
     nmib = 1;
+    irqb = 1;
     port_b_in = 8'hff;
 
     repeat (1) @(posedge clk);

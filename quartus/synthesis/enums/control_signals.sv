@@ -38,6 +38,8 @@ package control_signals;
     CtrlIncStackPointer = 25,
     CtrlDecStackPointer = 26,
     CtrlAluInvertB = 27,
+    CtrlSetInterruptDisable = 28,
+    CtrlClearInterruptDisable = 29,
 
     CtrlSignalEndMarker
   } ctrl_signals_t;
@@ -48,7 +50,7 @@ package control_signals;
     StatusFlagIgnored,
     StatusFlagBreak,
     StatusFlagDecimal,
-    StatusFlagInterrupt,
+    StatusFlagInterruptDisable,
     StatusFlagZero,
     StatusFlagCarry,
 

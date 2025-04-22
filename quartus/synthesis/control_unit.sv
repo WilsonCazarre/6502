@@ -6,6 +6,7 @@ module control_unit (
     input logic reset,
     input logic alu_carry,
     input logic nmib,
+    input logic irqb,
 
     output logic ctrl_signals[control_signals::CtrlSignalEndMarker],
     output control_signals::alu_op_t alu_op,
@@ -47,29 +48,51 @@ module control_unit (
     InstructionStateEndMarker
   } instruction_state_t;
 
+  typedef enum logic [3:0] {
+    InterruptNone,
+    InterruptNMI,
+    InterruptBRK,
+    InterruptIRQ,
+    InterruptRESET,
+    InterruptStateEndMarker
+  } interrupt_state_t;
+
+  logic interrupt_pending;
+
   instruction_state_t current_instr_state, next_instr_state;
+  interrupt_state_t current_interrupt;
   instruction_set::address_mode_t current_addr_mode, next_addr_mode;
   logic negative_data_in;
-
-  logic nmi_pending;
 
   always_ff @(posedge clk) begin
     if (reset) begin
       current_instr_state <= InstructionFetch;
-      nmi_pending <= 0;
-    end else if (nmi_pending && current_instr_state == InstructionFetch) begin
+      current_interrupt   <= InterruptRESET;
+      interrupt_pending   <= 1;
+    end else if (interrupt_pending && current_instr_state == InstructionFetch) begin
       current_instr_state <= InstructionBrk1;
-      current_addr_mode <= instruction_set::AddrModeImpl;
-      nmi_pending <= 0;
+      current_addr_mode   <= instruction_set::AddrModeImpl;
+      interrupt_pending   <= 0;
     end else begin
       negative_data_in <= data_in_latch[7];
       current_instr_state <= next_instr_state;
       current_addr_mode <= next_addr_mode;
+      current_interrupt <= current_instr_state == InstructionBrk7 ? InterruptNone : current_interrupt;
+      interrupt_pending <= interrupt_pending;
     end
   end
 
-  always_ff @(negedge nmib) begin : blockName
-    nmi_pending <= 1;
+  always_ff @(negedge nmib) begin
+    current_interrupt <= InterruptNMI;
+    interrupt_pending <= 1;
+  end
+
+  always_ff @(negedge irqb) begin
+    if (~status_flags[control_signals::StatusFlagInterruptDisable]) begin
+      current_interrupt <= InterruptIRQ;
+      interrupt_pending <= 1;
+    end
+
   end
 
   // -----------------------------------------------------
@@ -350,12 +373,13 @@ module control_unit (
 
     case (current_instr_state)
       InstructionBrk1: begin
-        next_instr_state = InstructionBrk2;
+        next_instr_state = current_interrupt == InterruptRESET ? InstructionBrk4 : InstructionBrk2;
         current_data_bus_input = bus_sources::DataBusSrcPCHigh;
         current_address_low_bus_input = bus_sources::AddressLowSrcStackPointer;
         current_address_high_bus_input = bus_sources::AddressHighSrcStackPointer;
-        ctrl_signals[control_signals::CtrlRead0Write1] = 1;
-        ctrl_signals[control_signals::CtrlDecStackPointer] = 1;
+        ctrl_signals[control_signals::CtrlRead0Write1] = current_interrupt != InterruptRESET;
+        ctrl_signals[control_signals::CtrlDecStackPointer] = current_interrupt != InterruptRESET;
+        ctrl_signals[control_signals::CtrlSetInterruptDisable] = current_interrupt == InterruptIRQ;
       end
       InstructionBrk2: begin
         next_instr_state = InstructionBrk3;
@@ -376,8 +400,13 @@ module control_unit (
       InstructionBrk4: begin
         next_instr_state = InstructionBrk5;
         current_data_bus_input = bus_sources::DataBusSrcDataIn;
-        current_address_low_bus_input = bus_sources::AddressLowSrcFA;
         current_address_high_bus_input = bus_sources::AddressHighSrcFF;
+        case (current_interrupt)
+          InterruptNMI: current_address_low_bus_input = bus_sources::AddressLowSrcFA;
+          InterruptIRQ: current_address_low_bus_input = bus_sources::AddressLowSrcFE;
+          InterruptRESET: current_address_low_bus_input = bus_sources::AddressLowSrcFC;
+          default: current_address_low_bus_input = bus_sources::AddressLowSrcFC;
+        endcase
       end
       InstructionBrk5: begin
         next_instr_state = InstructionBrk6;
@@ -389,8 +418,13 @@ module control_unit (
       InstructionBrk6: begin
         next_instr_state = InstructionBrk7;
         current_data_bus_input = bus_sources::DataBusSrcDataIn;
-        current_address_low_bus_input = bus_sources::AddressLowSrcFB;
         current_address_high_bus_input = bus_sources::AddressHighSrcFF;
+        case (current_interrupt)
+          InterruptNMI: current_address_low_bus_input = bus_sources::AddressLowSrcFB;
+          InterruptIRQ: current_address_low_bus_input = bus_sources::AddressLowSrcFF;
+          InterruptRESET: current_address_low_bus_input = bus_sources::AddressLowSrcFD;
+          default: current_address_low_bus_input = bus_sources::AddressLowSrcFD;
+        endcase
       end
       InstructionBrk7: begin
         next_instr_state = InstructionFetch;
@@ -405,8 +439,8 @@ module control_unit (
         current_address_high_bus_input = bus_sources::AddressHighSrcPcHigh;
 
         next_instr_state = InstructionDecode;
-        ctrl_signals[control_signals::CtrlLoadInstReg] = ~nmi_pending;
-        ctrl_signals[control_signals::CtrlIncEnablePc] = ~nmi_pending;
+        ctrl_signals[control_signals::CtrlLoadInstReg] = current_interrupt == InterruptNone;
+        ctrl_signals[control_signals::CtrlIncEnablePc] = current_interrupt == InterruptNone;
       end
       InstructionDecode: begin
         case (current_opcode)
@@ -431,6 +465,8 @@ module control_unit (
           instruction_set::OpcBPL_abs: imm_addr_mode();
           instruction_set::OpcBVC_abs: imm_addr_mode();
           instruction_set::OpcBVS_abs: imm_addr_mode();
+
+          instruction_set::OpcCLI_impl: impl_addr_mode();
 
           instruction_set::OpcCLC_impl: impl_addr_mode();
 
@@ -504,6 +540,8 @@ module control_unit (
           instruction_set::OpcSBC_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
           instruction_set::OpcSBC_zpg:  zpg_addr_mode();
 
+          instruction_set::OpcSEI_impl: impl_addr_mode();
+
           instruction_set::OpcSEC_impl: impl_addr_mode();
 
           instruction_set::OpcSTA_abs:  abs_addr_mode();
@@ -572,6 +610,7 @@ module control_unit (
       instruction_set::OpcBVC_abs: exec_branch();
       instruction_set::OpcBVS_abs: exec_branch();
 
+      instruction_set::OpcCLI_impl: exec_cli();
       instruction_set::OpcCLC_impl: exec_clc();
 
       instruction_set::OpcCMP_imm:  exec_cmp(bus_sources::DataBusSrcRegAccumulator);
@@ -643,6 +682,7 @@ module control_unit (
       instruction_set::OpcSBC_absy: exec_arithmetic_op(control_signals::ALU_ADD, 1);
       instruction_set::OpcSBC_zpg:  exec_arithmetic_op(control_signals::ALU_ADD, 1);
 
+      instruction_set::OpcSEI_impl: exec_sei();
       instruction_set::OpcSEC_impl: exec_sec();
 
       instruction_set::OpcSTA_abs:  exec_sta();
@@ -787,6 +827,16 @@ module control_unit (
       InstructionExec1: begin
         next_instr_state = InstructionFetch;
         ctrl_signals[control_signals::CtrlClearFlagCarry] = 1;
+      end
+      default: invalid_state();
+    endcase
+  endtask
+
+  task exec_cli();
+    case (current_instr_state)
+      InstructionExec1: begin
+        next_instr_state = InstructionFetch;
+        ctrl_signals[control_signals::CtrlClearInterruptDisable] = 1;
       end
       default: invalid_state();
     endcase
@@ -1012,6 +1062,7 @@ module control_unit (
         ctrl_signals[control_signals::CtrlUpdateFlagCarry] = 1;
         ctrl_signals[control_signals::CtrlUpdateFlagOverflow] = 1;
         ctrl_signals[control_signals::CtrlIncStackPointer] = 1;
+        ctrl_signals[control_signals::CtrlClearInterruptDisable] = current_interrupt == InterruptIRQ;
       end
       InstructionExec3: begin
         next_instr_state = InstructionExec4;
@@ -1077,6 +1128,16 @@ module control_unit (
 
         ctrl_signals[control_signals::CtrlIncEnablePc] = 0;
         ctrl_signals[control_signals::CtrlLoadPc] = 1;
+      end
+      default: invalid_state();
+    endcase
+  endtask
+
+  task exec_sei();
+    case (current_instr_state)
+      InstructionExec1: begin
+        next_instr_state = InstructionFetch;
+        ctrl_signals[control_signals::CtrlSetInterruptDisable] = 1;
       end
       default: invalid_state();
     endcase
