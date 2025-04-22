@@ -2,9 +2,10 @@ module control_unit (
     input logic status_flags[8],
     input logic [7:0] data_in_latch,
     input instruction_set::opcode_t current_opcode,
-    input clk,
-    input reset,
-    input alu_carry,
+    input logic clk,
+    input logic reset,
+    input logic alu_carry,
+    input logic nmib,
 
     output logic ctrl_signals[control_signals::CtrlSignalEndMarker],
     output control_signals::alu_op_t alu_op,
@@ -32,6 +33,15 @@ module control_unit (
     InstructionExec3,
     InstructionExec4,
     InstructionExec5,
+    InstructionExec6,
+
+    InstructionBrk1,
+    InstructionBrk2,
+    InstructionBrk3,
+    InstructionBrk4,
+    InstructionBrk5,
+    InstructionBrk6,
+    InstructionBrk7,
 
     InstructionInvalid,
     InstructionStateEndMarker
@@ -41,14 +51,25 @@ module control_unit (
   instruction_set::address_mode_t current_addr_mode, next_addr_mode;
   logic negative_data_in;
 
+  logic nmi_pending;
+
   always_ff @(posedge clk) begin
     if (reset) begin
       current_instr_state <= InstructionFetch;
+      nmi_pending <= 0;
+    end else if (nmi_pending && current_instr_state == InstructionFetch) begin
+      current_instr_state <= InstructionBrk1;
+      current_addr_mode <= instruction_set::AddrModeImpl;
+      nmi_pending <= 0;
     end else begin
       negative_data_in <= data_in_latch[7];
       current_instr_state <= next_instr_state;
       current_addr_mode <= next_addr_mode;
     end
+  end
+
+  always_ff @(negedge nmib) begin : blockName
+    nmi_pending <= 1;
   end
 
   // -----------------------------------------------------
@@ -199,6 +220,7 @@ module control_unit (
 
         ctrl_signals[control_signals::CtrlLoadInputA] = 1;
         ctrl_signals[control_signals::CtrlClearFlagCarry] = 1;
+        ctrl_signals[control_signals::CtrlIncEnablePc] = 0;
       end
       InstructionMem1: begin
         next_instr_state = InstructionMem2;
@@ -206,7 +228,7 @@ module control_unit (
         current_data_bus_input = bus_sources::DataBusSrcZero;
 
         ctrl_signals[control_signals::CtrlLoadInputB] = 1;
-        ctrl_signals[control_signals::CtrlIncEnablePc] = 1;
+        ctrl_signals[control_signals::CtrlIncEnablePc] = 0;
 
         alu_op = control_signals::ALU_ADD;
       end
@@ -225,7 +247,6 @@ module control_unit (
           next_instr_state = InstructionMem5;
         end
         current_data_bus_input = bus_sources::DataBusSrcDataIn;
-        ctrl_signals[control_signals::CtrlIncEnablePc] = 1;
         ctrl_signals[control_signals::CtrlLoadAddrHigh] = 1;
       end
       InstructionMem4: begin
@@ -238,7 +259,6 @@ module control_unit (
         current_address_low_bus_input = bus_sources::AddressLowSrcAddrLowReg;
         current_address_high_bus_input = bus_sources::AddressHighSrcAddrHighReg;
 
-        ctrl_signals[control_signals::CtrlLoadPc] = 1;
         ctrl_signals[control_signals::CtrlLoadAddrLow] = 1;
       end
       InstructionMem6: begin
@@ -329,14 +349,64 @@ module control_unit (
     alu_op = control_signals::ALU_ADD;
 
     case (current_instr_state)
+      InstructionBrk1: begin
+        next_instr_state = InstructionBrk2;
+        current_data_bus_input = bus_sources::DataBusSrcPCHigh;
+        current_address_low_bus_input = bus_sources::AddressLowSrcStackPointer;
+        current_address_high_bus_input = bus_sources::AddressHighSrcStackPointer;
+        ctrl_signals[control_signals::CtrlRead0Write1] = 1;
+        ctrl_signals[control_signals::CtrlDecStackPointer] = 1;
+      end
+      InstructionBrk2: begin
+        next_instr_state = InstructionBrk3;
+        current_data_bus_input = bus_sources::DataBusSrcPCLow;
+        current_address_low_bus_input = bus_sources::AddressLowSrcStackPointer;
+        current_address_high_bus_input = bus_sources::AddressHighSrcStackPointer;
+        ctrl_signals[control_signals::CtrlRead0Write1] = 1;
+        ctrl_signals[control_signals::CtrlDecStackPointer] = 1;
+      end
+      InstructionBrk3: begin
+        next_instr_state = InstructionBrk4;
+        current_data_bus_input = bus_sources::DataBusSrcStatusRegister;
+        current_address_low_bus_input = bus_sources::AddressLowSrcStackPointer;
+        current_address_high_bus_input = bus_sources::AddressHighSrcStackPointer;
+        ctrl_signals[control_signals::CtrlRead0Write1] = 1;
+        ctrl_signals[control_signals::CtrlDecStackPointer] = 1;
+      end
+      InstructionBrk4: begin
+        next_instr_state = InstructionBrk5;
+        current_data_bus_input = bus_sources::DataBusSrcDataIn;
+        current_address_low_bus_input = bus_sources::AddressLowSrcFA;
+        current_address_high_bus_input = bus_sources::AddressHighSrcFF;
+      end
+      InstructionBrk5: begin
+        next_instr_state = InstructionBrk6;
+        current_data_bus_input = bus_sources::DataBusSrcDataInLatch;
+        current_address_low_bus_input = bus_sources::AddressLowSrcDataBus;
+        current_address_high_bus_input = bus_sources::AddressHighSrcPcHigh;
+        ctrl_signals[control_signals::CtrlLoadPc] = 1;
+      end
+      InstructionBrk6: begin
+        next_instr_state = InstructionBrk7;
+        current_data_bus_input = bus_sources::DataBusSrcDataIn;
+        current_address_low_bus_input = bus_sources::AddressLowSrcFB;
+        current_address_high_bus_input = bus_sources::AddressHighSrcFF;
+      end
+      InstructionBrk7: begin
+        next_instr_state = InstructionFetch;
+        current_data_bus_input = bus_sources::DataBusSrcDataInLatch;
+        current_address_low_bus_input = bus_sources::AddressLowSrcPcLow;
+        current_address_high_bus_input = bus_sources::AddressHighSrcDataBus;
+        ctrl_signals[control_signals::CtrlLoadPc] = 1;
+      end
       InstructionFetch: begin
         current_data_bus_input = bus_sources::DataBusSrcDataIn;
         current_address_low_bus_input = bus_sources::AddressLowSrcPcLow;
         current_address_high_bus_input = bus_sources::AddressHighSrcPcHigh;
 
         next_instr_state = InstructionDecode;
-        ctrl_signals[control_signals::CtrlLoadInstReg] = 1;
-        ctrl_signals[control_signals::CtrlIncEnablePc] = 1;
+        ctrl_signals[control_signals::CtrlLoadInstReg] = ~nmi_pending;
+        ctrl_signals[control_signals::CtrlIncEnablePc] = ~nmi_pending;
       end
       InstructionDecode: begin
         case (current_opcode)
@@ -425,6 +495,7 @@ module control_unit (
           instruction_set::OpcPLX_impl: impl_addr_mode();
           instruction_set::OpcPLY_impl: impl_addr_mode();
 
+          instruction_set::OpcRTI_impl: impl_addr_mode();
           instruction_set::OpcRTS_impl: impl_addr_mode();
 
           instruction_set::OpcSBC_imm:  imm_addr_mode();
@@ -559,10 +630,11 @@ module control_unit (
       instruction_set::OpcPHX_impl: exec_pha(bus_sources::DataBusSrcRegX);
       instruction_set::OpcPHY_impl: exec_pha(bus_sources::DataBusSrcRegY);
 
-      instruction_set::OpcPLA_impl: exec_pla(control_signals::CtrlLoadAccumutator);
+      instruction_set::OpcPLA_impl: exec_pla(control_signals::CtrlLoadAccumulator);
       instruction_set::OpcPLA_impl: exec_pla(control_signals::CtrlLoadX);
       instruction_set::OpcPLA_impl: exec_pla(control_signals::CtrlLoadY);
 
+      instruction_set::OpcRTI_impl: exec_rti();
       instruction_set::OpcRTS_impl: exec_rts();
 
       instruction_set::OpcSBC_imm:  exec_arithmetic_op(control_signals::ALU_ADD, 1);
@@ -594,12 +666,12 @@ module control_unit (
       instruction_set::OpcTSX_impl: exec_tsx();
 
       instruction_set::OpcTXA_impl:
-      exec_transfer(bus_sources::DataBusSrcRegX, control_signals::CtrlLoadAccumutator);
+      exec_transfer(bus_sources::DataBusSrcRegX, control_signals::CtrlLoadAccumulator);
 
       instruction_set::OpcTXS_impl: exec_txs();
 
       instruction_set::OpcTYA_impl:
-      exec_transfer(bus_sources::DataBusSrcRegY, control_signals::CtrlLoadAccumutator);
+      exec_transfer(bus_sources::DataBusSrcRegY, control_signals::CtrlLoadAccumulator);
 
       default: invalid_state();
     endcase
@@ -625,7 +697,7 @@ module control_unit (
           ctrl_signals[control_signals::CtrlAluInvertB] = 1;
         end
         current_data_bus_input = bus_sources::DataBusSrcRegAluResult;
-        ctrl_signals[control_signals::CtrlLoadAccumutator] = 1;
+        ctrl_signals[control_signals::CtrlLoadAccumulator] = 1;
         ctrl_signals[control_signals::CtrlUpdateFlagNegative] = 1;
         ctrl_signals[control_signals::CtrlUpdateFlagZero] = 1;
         ctrl_signals[control_signals::CtrlUpdateFlagCarry] = 1;
@@ -651,7 +723,7 @@ module control_unit (
       InstructionExec3: begin
         next_instr_state = InstructionFetch;
         current_data_bus_input = bus_sources::DataBusSrcRegAluResult;
-        ctrl_signals[control_signals::CtrlLoadAccumutator] = 1;
+        ctrl_signals[control_signals::CtrlLoadAccumulator] = 1;
         ctrl_signals[control_signals::CtrlUpdateFlagNegative] = 1;
         ctrl_signals[control_signals::CtrlUpdateFlagZero] = 1;
       end
@@ -758,7 +830,7 @@ module control_unit (
         next_instr_state = InstructionFetch;
         current_data_bus_input = bus_sources::DataBusSrcRegAluResult;
         ctrl_signals[control_signals::CtrlAluCarryIn] = 1;
-        ctrl_signals[control_signals::CtrlLoadAccumutator] = 1;
+        ctrl_signals[control_signals::CtrlLoadAccumulator] = 1;
         ctrl_signals[control_signals::CtrlUpdateFlagNegative] = 1;
         ctrl_signals[control_signals::CtrlUpdateFlagZero] = 1;
       end
@@ -858,7 +930,7 @@ module control_unit (
       InstructionExec1: begin
         next_instr_state = InstructionFetch;
         current_data_bus_input = bus_sources::DataBusSrcDataIn;
-        ctrl_signals[control_signals::CtrlLoadAccumutator] = 1;
+        ctrl_signals[control_signals::CtrlLoadAccumulator] = 1;
         ctrl_signals[control_signals::CtrlUpdateFlagNegative] = 1;
         ctrl_signals[control_signals::CtrlUpdateFlagZero] = 1;
       end
@@ -910,7 +982,6 @@ module control_unit (
     case (current_instr_state)
       InstructionExec1: begin
         next_instr_state = InstructionExec2;
-        // ctrl_signals[control_signals::CtrlRead0Write1] = 1;
         ctrl_signals[control_signals::CtrlIncStackPointer] = 1;
       end
       InstructionExec2: begin
@@ -919,6 +990,55 @@ module control_unit (
         current_address_low_bus_input = bus_sources::AddressLowSrcStackPointer;
         current_address_high_bus_input = bus_sources::AddressHighSrcStackPointer;
         ctrl_signals[pull_src] = 1;
+      end
+      default: invalid_state();
+    endcase
+  endtask
+
+
+  task exec_rti();
+    case (current_instr_state)
+      InstructionExec1: begin
+        next_instr_state = InstructionExec2;
+        ctrl_signals[control_signals::CtrlIncStackPointer] = 1;
+      end
+      InstructionExec2: begin
+        next_instr_state = InstructionExec3;
+        current_data_bus_input = bus_sources::DataBusSrcDataIn;
+        current_address_low_bus_input = bus_sources::AddressLowSrcStackPointer;
+        current_address_high_bus_input = bus_sources::AddressHighSrcStackPointer;
+        ctrl_signals[control_signals::CtrlUpdateFlagZero] = 1;
+        ctrl_signals[control_signals::CtrlUpdateFlagNegative] = 1;
+        ctrl_signals[control_signals::CtrlUpdateFlagCarry] = 1;
+        ctrl_signals[control_signals::CtrlUpdateFlagOverflow] = 1;
+        ctrl_signals[control_signals::CtrlIncStackPointer] = 1;
+      end
+      InstructionExec3: begin
+        next_instr_state = InstructionExec4;
+        current_data_bus_input = bus_sources::DataBusSrcDataIn;
+        current_address_low_bus_input = bus_sources::AddressLowSrcStackPointer;
+        current_address_high_bus_input = bus_sources::AddressHighSrcStackPointer;
+        ctrl_signals[control_signals::CtrlIncStackPointer] = 1;
+      end
+      InstructionExec4: begin
+        next_instr_state = InstructionExec5;
+        current_data_bus_input = bus_sources::DataBusSrcDataInLatch;
+        current_address_low_bus_input = bus_sources::AddressLowSrcDataBus;
+        current_address_high_bus_input = bus_sources::AddressHighSrcPcHigh;
+        ctrl_signals[control_signals::CtrlLoadPc] = 1;
+      end
+      InstructionExec5: begin
+        next_instr_state = InstructionExec6;
+        current_data_bus_input = bus_sources::DataBusSrcDataIn;
+        current_address_low_bus_input = bus_sources::AddressLowSrcStackPointer;
+        current_address_high_bus_input = bus_sources::AddressHighSrcStackPointer;
+      end
+      InstructionExec6: begin
+        next_instr_state = InstructionFetch;
+        current_data_bus_input = bus_sources::DataBusSrcDataInLatch;
+        current_address_low_bus_input = bus_sources::AddressLowSrcPcLow;
+        current_address_high_bus_input = bus_sources::AddressHighSrcDataBus;
+        ctrl_signals[control_signals::CtrlLoadPc] = 1;
       end
       default: invalid_state();
     endcase

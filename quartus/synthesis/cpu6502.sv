@@ -2,6 +2,7 @@ module cpu6502 (
     input logic reset,
     input logic clk_in,
     output logic READ_write,
+    input logic nmib,
     input logic [7:0] data_in,
     output logic [7:0] data_out,
     output logic [15:0] address_out
@@ -47,7 +48,14 @@ module cpu6502 (
   };
   assign address_high_bus_inputs[bus_sources::AddressHighSrcStackPointer] = 8'h01;
   assign address_low_bus_inputs[bus_sources::AddressLowSrcZero] = 8'h00;
+  assign address_low_bus_inputs[bus_sources::AddressLowSrcFA] = 8'hfa;
+  assign address_low_bus_inputs[bus_sources::AddressLowSrcFB] = 8'hfb;
+  assign address_low_bus_inputs[bus_sources::AddressLowSrcFC] = 8'hfc;
+  assign address_low_bus_inputs[bus_sources::AddressLowSrcFD] = 8'hfd;
+  assign address_low_bus_inputs[bus_sources::AddressLowSrcFE] = 8'hfe;
+  assign address_low_bus_inputs[bus_sources::AddressLowSrcFF] = 8'hfd;
   assign address_high_bus_inputs[bus_sources::AddressHighSrcZero] = 8'h00;
+  assign address_high_bus_inputs[bus_sources::AddressHighSrcFF] = 8'hff;
 
   assign data_bus_inputs[bus_sources::DataBusSrcAddrLowBus] = address_low_bus;
   assign data_bus_inputs[bus_sources::DataBusSrcAddrHighBus] = address_high_bus;
@@ -67,7 +75,7 @@ module cpu6502 (
       .data_in(data_bus),
       .data_out(data_bus_inputs[bus_sources::DataBusSrcRegAccumulator]),
       .clk(clk_in),
-      .load(ctrl_signals[control_signals::CtrlLoadAccumutator]),
+      .load(ctrl_signals[control_signals::CtrlLoadAccumulator]),
       .reset(reset),
       .inc(1'b0),
       .dec(1'b0)
@@ -177,11 +185,24 @@ module cpu6502 (
   );
 
   // Status Register
-
-  assign status_flags[control_signals::StatusFlagCarry] = flag_carry;
-  assign status_flags[control_signals::StatusFlagZero] = flag_zero;
   assign status_flags[control_signals::StatusFlagNegative] = flag_negative;
   assign status_flags[control_signals::StatusFlagOverflow] = flag_overflow;
+  assign status_flags[control_signals::StatusFlagIgnored] = 0;
+  assign status_flags[control_signals::StatusFlagBreak] = 0;
+  assign status_flags[control_signals::StatusFlagDecimal] = 0;
+  assign status_flags[control_signals::StatusFlagInterrupt] = 0;
+  assign status_flags[control_signals::StatusFlagZero] = flag_zero;
+  assign status_flags[control_signals::StatusFlagCarry] = flag_carry;
+  assign data_bus_inputs[bus_sources::DataBusSrcStatusRegister] = '{
+          status_flags[0],
+          status_flags[1],
+          status_flags[2],
+          status_flags[3],
+          status_flags[4],
+          status_flags[5],
+          status_flags[6],
+          status_flags[7]
+      };
   status_register status_register (
       .data_in        (data_bus),
       .update_zero    (ctrl_signals[control_signals::CtrlUpdateFlagZero]),
@@ -201,6 +222,8 @@ module cpu6502 (
       .flag_negative  (flag_negative),
       .flag_overflow  (flag_overflow)
   );
+
+
 
   // Instruction Register
   instruction_set::opcode_t instruction_register;
@@ -226,7 +249,8 @@ module cpu6502 (
       .current_address_low_bus_input (current_address_low_bus_input),
       .current_address_high_bus_input(current_address_high_bus_input),
       .clk                           (clk_in),
-      .reset                         (reset)
+      .reset                         (reset),
+      .nmib                          (nmib)
   );
 
 

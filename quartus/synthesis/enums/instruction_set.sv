@@ -24,6 +24,8 @@ package instruction_set;
     OpcBVC_abs = 8'h50,
     OpcBVS_abs = 8'h70,
 
+    OpcBRK_impl = 8'h00,
+
     OpcCLC_impl = 8'h18,
 
     OpcCMP_imm  = 8'hc9,
@@ -88,6 +90,7 @@ package instruction_set;
     OpcPLX_impl = 8'hfa,
     OpcPLY_impl = 8'h7a,
 
+    OpcRTI_impl = 8'h40,
     OpcRTS_impl = 8'h60,
 
     OpcSBC_imm  = 8'he9,

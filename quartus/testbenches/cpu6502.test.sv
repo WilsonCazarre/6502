@@ -4,6 +4,7 @@ module cpu6502_test ();
   always #10 clk = ~clk;
 
   logic reset;
+  logic nmib;
   logic READ_write;
   logic [7:0] data_in_cpu, data_out_cpu;
   logic [15:0] address_out;
@@ -14,7 +15,8 @@ module cpu6502_test ();
       .READ_write (READ_write),
       .data_in    (data_in_cpu),
       .data_out   (data_out_cpu),
-      .address_out(address_out)
+      .address_out(address_out),
+      .nmib       (nmib)
   );
 
   logic [7:0] ram_out;
@@ -72,10 +74,13 @@ module cpu6502_test ();
   end
   initial begin
     reset = 1;
+    nmib = 1;
     port_b_in = 8'hff;
 
     repeat (1) @(posedge clk);
     reset = 0;
+    repeat (19) @(posedge clk);
+    nmib = 0;
     repeat (500) @(posedge clk);
     $stop;
   end

@@ -10,7 +10,7 @@ package control_signals;
   } alu_op_t;
 
   typedef enum logic [31:0] {
-    CtrlLoadAccumutator = 0,
+    CtrlLoadAccumulator = 0,
     CtrlLoadX = 1,
     CtrlLoadY = 2,
     CtrlLoadInputA = 3,
@@ -45,8 +45,12 @@ package control_signals;
   typedef enum logic [31:0] {
     StatusFlagNegative,
     StatusFlagOverflow,
-    StatusFlagCarry,
+    StatusFlagIgnored,
+    StatusFlagBreak,
+    StatusFlagDecimal,
+    StatusFlagInterrupt,
     StatusFlagZero,
+    StatusFlagCarry,
 
     StatusFlagEndMarker
   } status_flags_t;

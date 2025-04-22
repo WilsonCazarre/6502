@@ -17,6 +17,8 @@ package bus_sources;
     DataBusSrcPCHigh,
     DataBusSrcPCLow,
 
+    DataBusSrcStatusRegister,
+
     DataBusSrcEndMarker
   } data_bus_source_t;
 
@@ -28,6 +30,13 @@ package bus_sources;
 
     AddressLowSrcAddrLowReg,
     AddressLowSrcZero,
+
+    AddressLowSrcFA,
+    AddressLowSrcFB,
+    AddressLowSrcFC,
+    AddressLowSrcFD,
+    AddressLowSrcFE,
+    AddressLowSrcFF,
 
     AddressLowSrcStackPointer,
     AddressLowSrcDataBus,
@@ -44,6 +53,7 @@ package bus_sources;
     AddressHighSrcAddrHighReg,
 
     AddressHighSrcZero,
+    AddressHighSrcFF,
 
     AddressHighSrcStackPointer,
     AddressHighSrcDataBus,
