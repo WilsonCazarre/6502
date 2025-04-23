@@ -455,6 +455,7 @@ module control_unit (
           instruction_set::OpcAND_abs:  abs_addr_mode();
           instruction_set::OpcAND_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
           instruction_set::OpcAND_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
+          instruction_set::OpcAND_indx: indx_addr_mode();
           instruction_set::OpcAND_zpg:  zpg_addr_mode();
 
           instruction_set::OpcBCC_abs: imm_addr_mode();
@@ -474,6 +475,7 @@ module control_unit (
           instruction_set::OpcCMP_abs:  abs_addr_mode();
           instruction_set::OpcCMP_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
           instruction_set::OpcCMP_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
+          instruction_set::OpcCMP_indx: indx_addr_mode();
           instruction_set::OpcCMP_zpg:  zpg_addr_mode();
 
           instruction_set::OpcCPX_imm: imm_addr_mode();
@@ -488,6 +490,7 @@ module control_unit (
           instruction_set::OpcEOR_abs:  abs_addr_mode();
           instruction_set::OpcEOR_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
           instruction_set::OpcEOR_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
+          instruction_set::OpcEOR_indx: indx_addr_mode();
           instruction_set::OpcEOR_zpg:  zpg_addr_mode();
 
           instruction_set::OpcINX_impl: impl_addr_mode();
@@ -502,6 +505,7 @@ module control_unit (
           instruction_set::OpcLDA_abs:  abs_addr_mode();
           instruction_set::OpcLDA_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
           instruction_set::OpcLDA_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
+          instruction_set::OpcLDA_indx: indx_addr_mode();
           instruction_set::OpcLDA_zpg:  zpg_addr_mode();
           instruction_set::OpcLDA_zpgx: zpgx_addr_mode(bus_sources::DataBusSrcRegX);
 
@@ -521,6 +525,7 @@ module control_unit (
           instruction_set::OpcORA_abs:  abs_addr_mode();
           instruction_set::OpcORA_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
           instruction_set::OpcORA_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
+          instruction_set::OpcORA_indx: indx_addr_mode();
           instruction_set::OpcORA_zpg:  zpg_addr_mode();
 
           instruction_set::OpcPHA_impl: impl_addr_mode();
@@ -538,6 +543,7 @@ module control_unit (
           instruction_set::OpcSBC_abs:  abs_addr_mode();
           instruction_set::OpcSBC_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
           instruction_set::OpcSBC_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
+          instruction_set::OpcSBC_indx: indx_addr_mode();
           instruction_set::OpcSBC_zpg:  zpg_addr_mode();
 
           instruction_set::OpcSEI_impl: impl_addr_mode();
@@ -547,6 +553,7 @@ module control_unit (
           instruction_set::OpcSTA_abs:  abs_addr_mode();
           instruction_set::OpcSTA_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
           instruction_set::OpcSTA_absy: absx_addr_mode(bus_sources::DataBusSrcRegY);
+          instruction_set::OpcSTA_indx: indx_addr_mode();
           instruction_set::OpcSTA_zpg:  zpg_addr_mode();
           instruction_set::OpcSTA_zpgx: zpgx_addr_mode(bus_sources::DataBusSrcRegX);
 

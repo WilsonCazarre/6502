@@ -1,7 +1,7 @@
 package instruction_set;
 
   typedef enum logic [7:0] {
-    // 93/149
+    // 100/149
     OpcADC_imm  = 8'h69,
     OpcADC_abs  = 8'h6d,
     OpcADC_absx = 8'h7d,
@@ -13,6 +13,7 @@ package instruction_set;
     OpcAND_abs  = 8'h2d,
     OpcAND_absx = 8'h3d,
     OpcAND_absy = 8'h39,
+    OpcAND_indx = 8'h21,
     OpcAND_zpg  = 8'h25,
 
     OpcBCC_abs = 8'h90,
@@ -33,6 +34,7 @@ package instruction_set;
     OpcCMP_abs  = 8'hcd,
     OpcCMP_absx = 8'hdd,
     OpcCMP_absy = 8'hd9,
+    OpcCMP_indx = 8'hc1,
     OpcCMP_zpg  = 8'hc5,
 
     OpcCPX_imm = 8'he0,
@@ -47,6 +49,7 @@ package instruction_set;
     OpcEOR_abs  = 8'h4d,
     OpcEOR_absx = 8'h5d,
     OpcEOR_absy = 8'h59,
+    OpcEOR_indx = 8'h41,
     OpcEOR_zpg  = 8'h45,
 
     OpcINX_impl = 8'he8,
@@ -62,6 +65,7 @@ package instruction_set;
     OpcLDA_abs  = 8'had,
     OpcLDA_absx = 8'hbd,
     OpcLDA_absy = 8'hb9,
+    OpcLDA_indx = 8'ha1,
     OpcLDA_zpg  = 8'ha5,
     OpcLDA_zpgx = 8'hb5,
 
@@ -81,6 +85,7 @@ package instruction_set;
     OpcORA_abs  = 8'h0d,
     OpcORA_absx = 8'h1d,
     OpcORA_absy = 8'h19,
+    OpcORA_indx = 8'h01,
     OpcORA_zpg  = 8'h05,
 
     OpcPHA_impl = 8'h48,
@@ -98,6 +103,7 @@ package instruction_set;
     OpcSBC_abs  = 8'hed,
     OpcSBC_absx = 8'hfd,
     OpcSBC_absy = 8'hf9,
+    OpcSBC_indx = 8'he1,
     OpcSBC_zpg  = 8'he5,
 
     OpcSEC_impl = 8'h38,
@@ -106,6 +112,7 @@ package instruction_set;
     OpcSTA_abs  = 8'h8d,
     OpcSTA_absx = 8'h9d,
     OpcSTA_absy = 8'h99,
+    OpcSTA_indx = 8'h81,
     OpcSTA_zpg  = 8'h85,
     OpcSTA_zpgx = 8'h95,
 
