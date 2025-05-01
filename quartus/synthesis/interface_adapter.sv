@@ -47,9 +47,8 @@ module interface_adapter (
       ctrl_registers <= '{default: '0};
       port_a <= 8'h0;
       port_b <= 8'h0;
-    end else
-    if (!chip_en) begin
-
+    end else if (!chip_en) begin
+      data_out <= 8'hz;
     end else begin
       case (register_select)
         DDRA: ctrl_registers[DDRA] <= data_in;

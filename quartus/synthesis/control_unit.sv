@@ -57,8 +57,6 @@ module control_unit (
     InterruptStateEndMarker
   } interrupt_state_t;
 
-  logic interrupt_pending;
-
   instruction_state_t current_instr_state, next_instr_state;
   interrupt_state_t current_interrupt;
   instruction_set::address_mode_t current_addr_mode, next_addr_mode;
@@ -68,32 +66,24 @@ module control_unit (
     if (reset) begin
       current_instr_state <= InstructionFetch;
       current_interrupt   <= InterruptRESET;
-      interrupt_pending   <= 1;
-    end else if (interrupt_pending && current_instr_state == InstructionFetch) begin
+    end else if (~nmib && current_instr_state == InstructionFetch) begin
       current_instr_state <= InstructionBrk1;
       current_addr_mode   <= instruction_set::AddrModeImpl;
-      interrupt_pending   <= 0;
+      current_interrupt   <= InterruptNMI;
     end else begin
       negative_data_in <= data_in_latch[7];
       current_instr_state <= next_instr_state;
       current_addr_mode <= next_addr_mode;
       current_interrupt <= current_instr_state == InstructionBrk7 ? InterruptNone : current_interrupt;
-      interrupt_pending <= interrupt_pending;
     end
   end
 
-  always_ff @(negedge nmib) begin
-    current_interrupt <= InterruptNMI;
-    interrupt_pending <= 1;
-  end
-
-  always_ff @(negedge irqb) begin
-    if (~status_flags[control_signals::StatusFlagInterruptDisable]) begin
-      current_interrupt <= InterruptIRQ;
-      interrupt_pending <= 1;
-    end
-
-  end
+  // always_ff @(negedge irqb) begin
+  //   if (~status_flags[control_signals::StatusFlagInterruptDisable]) begin
+  //     // current_interrupt <= InterruptIRQ;
+  //     interrupt_pending <= 1;
+  //   end
+  // end
 
   // -----------------------------------------------------
   // ---------- Address Modes System Tasks ---------------

@@ -25,24 +25,6 @@ RS=%00100000
   lda #%00000110 ; Entry mode set
   jsr send_lcd_cmd
 
-  ldx #$00
-next_char:
-  lda message1, x
-  jsr print_char
-  inx
-  cpx #16
-  bne next_char
-
-  lda #%11000000 ; Go to next line
-  jsr send_lcd_cmd
-
-  ldx #$00
-next_char1:
-  lda message2, x
-  jsr print_char
-  inx
-  cpx #16
-  bne next_char1
 exit:
   jmp exit
 
@@ -67,8 +49,3 @@ send_lcd_cmd:
   lda #0         ; Clear E/RW/RS
   sta PORTA
   rts
-
-message1:
-  .byte "Hello, world!   "
-message2:
-  .byte "UNIFESP ICT     "
