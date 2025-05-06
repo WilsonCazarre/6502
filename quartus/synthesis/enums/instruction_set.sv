@@ -1,7 +1,7 @@
 package instruction_set;
 
   typedef enum logic [7:0] {
-    // 100/149
+    // 120/149
     OpcADC_imm  = 8'h69,
     OpcADC_abs  = 8'h6d,
     OpcADC_absx = 8'h7d,
@@ -15,6 +15,12 @@ package instruction_set;
     OpcAND_absy = 8'h39,
     OpcAND_indx = 8'h21,
     OpcAND_zpg  = 8'h25,
+
+    OpcASL_abs  = 8'h0e,
+    OpcASL_absx = 8'h1e,
+    OpcASL_acc  = 8'h0a,
+    OpcASL_zpg  = 8'h06,
+    OpcASL_zpgx = 8'h16,
 
     OpcBCC_abs = 8'h90,
     OpcBCS_abs = 8'hb0,
@@ -79,6 +85,12 @@ package instruction_set;
     OpcLDY_absx = 8'hbc,
     OpcLDY_zpg  = 8'ha4,
 
+    OpcLSR_abs  = 8'h4e,
+    OpcLSR_absx = 8'h5e,
+    OpcLSR_acc  = 8'h4a,
+    OpcLSR_zpg  = 8'h46,
+    OpcLSR_zpgx = 8'h56,
+
     OpcNOP_impl = 8'hea,
 
     OpcORA_imm  = 8'h09,
@@ -95,6 +107,18 @@ package instruction_set;
     OpcPLA_impl = 8'h68,
     OpcPLX_impl = 8'hfa,
     OpcPLY_impl = 8'h7a,
+
+    OpcROL_abs  = 8'h2e,
+    OpcROL_absx = 8'h3e,
+    OpcROL_acc  = 8'h2a,
+    OpcROL_zpg  = 8'h26,
+    OpcROL_zpgx = 8'h36,
+
+    OpcROR_abs  = 8'h6e,
+    OpcROR_absx = 8'h7e,
+    OpcROR_acc  = 8'h6a,
+    OpcROR_zpg  = 8'h66,
+    OpcROR_zpgx = 8'h76,
 
     OpcRTI_impl = 8'h40,
     OpcRTS_impl = 8'h60,
@@ -135,6 +159,7 @@ package instruction_set;
     AddrModeAbs,
     AddrModeAbsX,
     AddrModeAbsY,
+    AddrModeAcc,
     AddrModeInd,
     AddrModeIndX,
     AddrModeStack,

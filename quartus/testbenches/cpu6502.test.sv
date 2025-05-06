@@ -80,8 +80,6 @@ module cpu6502_test ();
 
     repeat (1) @(posedge clk);
     reset = 0;
-    repeat (19) @(posedge clk);
-    nmib = 0;
     repeat (500) @(posedge clk);
     $stop;
   end

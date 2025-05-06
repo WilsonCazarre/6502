@@ -6,7 +6,8 @@ package control_signals;
     ALU_AND,
     ALU_OR,
     ALU_XOR,
-    ALU_SHIFT_LEFT
+    ALU_SHIFT_LEFT,
+    ALU_SHIFT_RIGHT
   } alu_op_t;
 
   typedef enum logic [31:0] {

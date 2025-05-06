@@ -119,6 +119,16 @@ module control_unit (
     endcase
   endtask
 
+  task acc_addr_mode();
+    next_addr_mode = instruction_set::AddrModeAcc;
+    case (current_instr_state)
+      InstructionDecode: begin
+        next_instr_state = InstructionExec1;
+      end
+      default: opcode_exec();
+    endcase
+  endtask
+
   task imm_addr_mode();
     next_addr_mode = instruction_set::AddrModeImm;
     case (current_instr_state)
@@ -458,6 +468,12 @@ module control_unit (
           instruction_set::OpcAND_indx: indx_addr_mode();
           instruction_set::OpcAND_zpg:  zpg_addr_mode();
 
+          instruction_set::OpcASL_abs:  abs_addr_mode();
+          instruction_set::OpcASL_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
+          instruction_set::OpcASL_acc:  acc_addr_mode();
+          instruction_set::OpcASL_zpg:  zpg_addr_mode();
+          instruction_set::OpcASL_zpgx: zpgx_addr_mode(bus_sources::DataBusSrcRegX);
+
           instruction_set::OpcBCC_abs: imm_addr_mode();
           instruction_set::OpcBCS_abs: imm_addr_mode();
           instruction_set::OpcBEQ_abs: imm_addr_mode();
@@ -519,6 +535,12 @@ module control_unit (
           instruction_set::OpcLDY_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
           instruction_set::OpcLDY_zpg:  zpg_addr_mode();
 
+          instruction_set::OpcLSR_abs:  abs_addr_mode();
+          instruction_set::OpcLSR_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
+          instruction_set::OpcLSR_acc:  acc_addr_mode();
+          instruction_set::OpcLSR_zpg:  zpg_addr_mode();
+          instruction_set::OpcLSR_zpgx: zpgx_addr_mode(bus_sources::DataBusSrcRegX);
+
           instruction_set::OpcNOP_impl: next_instr_state = InstructionFetch;
 
           instruction_set::OpcORA_imm:  imm_addr_mode();
@@ -535,6 +557,18 @@ module control_unit (
           instruction_set::OpcPLA_impl: impl_addr_mode();
           instruction_set::OpcPLX_impl: impl_addr_mode();
           instruction_set::OpcPLY_impl: impl_addr_mode();
+
+          instruction_set::OpcROL_abs:  abs_addr_mode();
+          instruction_set::OpcROL_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
+          instruction_set::OpcROL_acc:  acc_addr_mode();
+          instruction_set::OpcROL_zpg:  zpg_addr_mode();
+          instruction_set::OpcROL_zpgx: zpgx_addr_mode(bus_sources::DataBusSrcRegX);
+
+          instruction_set::OpcROR_abs:  abs_addr_mode();
+          instruction_set::OpcROR_absx: absx_addr_mode(bus_sources::DataBusSrcRegX);
+          instruction_set::OpcROR_acc:  acc_addr_mode();
+          instruction_set::OpcROR_zpg:  zpg_addr_mode();
+          instruction_set::OpcROR_zpgx: zpgx_addr_mode(bus_sources::DataBusSrcRegX);
 
           instruction_set::OpcRTI_impl: impl_addr_mode();
           instruction_set::OpcRTS_impl: impl_addr_mode();
@@ -579,6 +613,7 @@ module control_unit (
           instruction_set::AddrModeAbs: abs_addr_mode();
           instruction_set::AddrModeAbsX: absx_addr_mode(bus_sources::DataBusSrcRegX);
           instruction_set::AddrModeAbsY: absx_addr_mode(bus_sources::DataBusSrcRegY);
+          instruction_set::AddrModeAcc: acc_addr_mode();
           instruction_set::AddrModeInd: ind_addr_mode();
           instruction_set::AddrModeIndX: indx_addr_mode();
           instruction_set::AddrModeImpl: impl_addr_mode();
@@ -607,6 +642,12 @@ module control_unit (
       instruction_set::OpcAND_absx: exec_logic_op(control_signals::ALU_AND);
       instruction_set::OpcAND_absy: exec_logic_op(control_signals::ALU_AND);
       instruction_set::OpcAND_zpg:  exec_logic_op(control_signals::ALU_AND);
+
+      instruction_set::OpcASL_abs:  exec_shift_op(control_signals::ALU_SHIFT_LEFT, 0);
+      instruction_set::OpcASL_absx: exec_shift_op(control_signals::ALU_SHIFT_LEFT, 0);
+      instruction_set::OpcASL_acc:  exec_shift_op(control_signals::ALU_SHIFT_LEFT, 0, 1);
+      instruction_set::OpcASL_zpg:  exec_shift_op(control_signals::ALU_SHIFT_LEFT, 0);
+      instruction_set::OpcASL_zpgx: exec_shift_op(control_signals::ALU_SHIFT_LEFT, 0);
 
       instruction_set::OpcBCC_abs: exec_branch();
       instruction_set::OpcBCS_abs: exec_branch();
@@ -666,6 +707,12 @@ module control_unit (
       instruction_set::OpcLDY_absx: exec_ldy();
       instruction_set::OpcLDY_zpg:  exec_ldy();
 
+      instruction_set::OpcLSR_abs:  exec_shift_op(control_signals::ALU_SHIFT_RIGHT, 0);
+      instruction_set::OpcLSR_absx: exec_shift_op(control_signals::ALU_SHIFT_RIGHT, 0);
+      instruction_set::OpcLSR_acc:  exec_shift_op(control_signals::ALU_SHIFT_RIGHT, 0, 1);
+      instruction_set::OpcLSR_zpg:  exec_shift_op(control_signals::ALU_SHIFT_RIGHT, 0);
+      instruction_set::OpcLSR_zpgx: exec_shift_op(control_signals::ALU_SHIFT_RIGHT, 0);
+
       instruction_set::OpcORA_imm:  exec_logic_op(control_signals::ALU_OR);
       instruction_set::OpcORA_abs:  exec_logic_op(control_signals::ALU_OR);
       instruction_set::OpcORA_absx: exec_logic_op(control_signals::ALU_OR);
@@ -679,6 +726,18 @@ module control_unit (
       instruction_set::OpcPLA_impl: exec_pla(control_signals::CtrlLoadAccumulator);
       instruction_set::OpcPLA_impl: exec_pla(control_signals::CtrlLoadX);
       instruction_set::OpcPLA_impl: exec_pla(control_signals::CtrlLoadY);
+
+      instruction_set::OpcROL_abs:  exec_shift_op(control_signals::ALU_SHIFT_LEFT, 1);
+      instruction_set::OpcROL_absx: exec_shift_op(control_signals::ALU_SHIFT_LEFT, 1);
+      instruction_set::OpcROL_acc:  exec_shift_op(control_signals::ALU_SHIFT_LEFT, 1, 1);
+      instruction_set::OpcROL_zpg:  exec_shift_op(control_signals::ALU_SHIFT_LEFT, 1);
+      instruction_set::OpcROL_zpgx: exec_shift_op(control_signals::ALU_SHIFT_LEFT, 1);
+
+      instruction_set::OpcROR_abs:  exec_shift_op(control_signals::ALU_SHIFT_RIGHT, 1);
+      instruction_set::OpcROR_absx: exec_shift_op(control_signals::ALU_SHIFT_RIGHT, 1);
+      instruction_set::OpcROR_acc:  exec_shift_op(control_signals::ALU_SHIFT_RIGHT, 1, 1);
+      instruction_set::OpcROR_zpg:  exec_shift_op(control_signals::ALU_SHIFT_RIGHT, 1);
+      instruction_set::OpcROR_zpgx: exec_shift_op(control_signals::ALU_SHIFT_RIGHT, 1);
 
       instruction_set::OpcRTI_impl: exec_rti();
       instruction_set::OpcRTS_impl: exec_rts();
@@ -721,6 +780,29 @@ module control_unit (
       exec_transfer(bus_sources::DataBusSrcRegY, control_signals::CtrlLoadAccumulator);
 
       default: invalid_state();
+    endcase
+  endtask
+
+  task exec_shift_op(control_signals::alu_op_t alu_op_arg, logic rotate_carry = 0,
+                     logic load_from_acc = 0);
+    alu_op = alu_op_arg;
+    case (current_instr_state)
+      InstructionExec1: begin
+        next_instr_state = InstructionExec2;
+        current_data_bus_input = 
+          load_from_acc ? bus_sources::DataBusSrcRegAccumulator : bus_sources::DataBusSrcDataIn;
+        ctrl_signals[control_signals::CtrlLoadInputA] = 1;
+      end
+      InstructionExec2: begin
+        next_instr_state = InstructionFetch;
+        current_data_bus_input = bus_sources::DataBusSrcRegAluResult;
+        ctrl_signals[control_signals::CtrlAluCarryIn] = 
+          rotate_carry ? status_flags[control_signals::StatusFlagCarry] : 0;
+        ctrl_signals[control_signals::CtrlLoadAccumulator] = 1;
+        ctrl_signals[control_signals::CtrlUpdateFlagNegative] = 1;
+        ctrl_signals[control_signals::CtrlUpdateFlagZero] = 1;
+        ctrl_signals[control_signals::CtrlUpdateFlagCarry] = 1;
+      end
     endcase
   endtask
 

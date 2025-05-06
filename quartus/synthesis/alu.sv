@@ -16,9 +16,9 @@ module alu (
   logic [7:0] effective_b;
   assign effective_b = invert_b ? ~input_b : input_b;
 
-  assign alu_out = result[7:0];
+  assign alu_out = operation == control_signals::ALU_SHIFT_RIGHT ? result[8:1] : result[7:0];
 
-  assign carry_out = result[8];
+  assign carry_out = operation == control_signals::ALU_SHIFT_RIGHT ? result[0] : result[8];
   assign negative_out = result[7];
   assign zero_out = ~|alu_out;
   assign overflow_out = (~input_a[7] & ~input_b[7] & result[7]) |
@@ -39,7 +39,10 @@ module alu (
         result = input_a ^ input_b;
       end
       control_signals::ALU_SHIFT_LEFT: begin
-        result = (input_a << 1) + carry_in;
+        result = {input_a, carry_in};
+      end
+      control_signals::ALU_SHIFT_RIGHT: begin
+        result = {carry_in, input_a};
       end
       default: begin
         result = 8'bx;
