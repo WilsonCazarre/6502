@@ -56,16 +56,18 @@ module control_unit (
     InterruptRESET,
     InterruptStateEndMarker
   } interrupt_state_t;
-
   logic interrupt_pending;
-
   instruction_state_t current_instr_state, next_instr_state;
   interrupt_state_t current_interrupt;
   instruction_set::address_mode_t current_addr_mode, next_addr_mode;
   logic negative_data_in;
 
-  always_ff @(posedge clk) begin
-    if (reset) begin
+  always_ff @(posedge clk or negedge nmib or negedge irqb) begin
+    if (~nmib || ~irqb) begin
+      current_instr_state <= InstructionFetch;
+      current_interrupt   <= InterruptNMI;
+      interrupt_pending   <= 1;
+    end else if (reset) begin
       current_instr_state <= InstructionFetch;
       current_interrupt   <= InterruptRESET;
       interrupt_pending   <= 1;
@@ -80,19 +82,6 @@ module control_unit (
       current_interrupt <= current_instr_state == InstructionBrk7 ? InterruptNone : current_interrupt;
       interrupt_pending <= interrupt_pending;
     end
-  end
-
-  always_ff @(negedge nmib) begin
-    current_interrupt <= InterruptNMI;
-    interrupt_pending <= 1;
-  end
-
-  always_ff @(negedge irqb) begin
-    if (~status_flags[control_signals::StatusFlagInterruptDisable]) begin
-      current_interrupt <= InterruptIRQ;
-      interrupt_pending <= 1;
-    end
-
   end
 
   // -----------------------------------------------------
